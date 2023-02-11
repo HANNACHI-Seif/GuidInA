@@ -1,0 +1,25 @@
+{
+  "name": "auth-node",
+  "version": "1.0.0",
+  "description": "authentication using node express ts typeorm mysql",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "dev": "nodemon ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "auth-node"
+  },
+  "author": "seif hann",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.13.0",
+    "express": "^4.18.2",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.20",
+    "typeorm": "^0.3.12",
+    "typescript": "^4.9.5"
+  }
+}
