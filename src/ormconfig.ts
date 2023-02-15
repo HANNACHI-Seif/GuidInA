@@ -1,4 +1,8 @@
 import { DataSource } from 'typeorm'
+import User from './entities/user'
+import Post from './entities/post'
+import Like from './entities/like'
+import Comment from './entities/comment'
 
 export default new DataSource({
     type: "mysql",
@@ -6,10 +10,10 @@ export default new DataSource({
     port: 3306,
     username: "seifon",
     password: "",
-    database: "auth-db",
+    database: "auth_db",
     synchronize: true,
     logging: false,
-    entities: [],
+    entities: [User, Post, Comment, Like],
     subscribers: [],
     migrations: [],
 })
