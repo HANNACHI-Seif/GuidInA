@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import User from "./user";
 
 
@@ -11,7 +11,7 @@ export default class RefreshToken {
     @Column('longtext')
     token: string
 
-    @OneToOne(() => User)
+    @ManyToOne(() => User)
     @JoinColumn()
     user: User
 

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken"
 import appDataSource from "../ormconfig"
 import User from "../entities/user";
 import RefreshToken from "../entities/refreshToken";
+import { Request, Response, NextFunction } from "express";
 require("dotenv").config();
 
 
@@ -22,29 +23,39 @@ let authToken = async (token: string, secret: string) => {
     }
 }
 
+let authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        //checking token existance
+        let authHeader = req.headers['authorization']
+        let token = authHeader?.split(' ')[1] //bearer token, 1 represents token
+        if (!token) throw new Error("please login first!")
+        //token validation
+        let user = await authToken(token!, process.env.ACCESS_TOKEN_SECRET!)
+        if (!user) throw new Error("unvalid token, please login and try again")
+        //next...
+        req.body.user = user
+        next()  
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "unauthorized" })
+    }
+  }
+
 interface usr {
     id: string,
-    username: string,
-    email: string
 }
 
 
-
-let generateToken = async (user: usr, access: string, refresh: string, accExpDate: string, reExpDate: string) =>  {
-    return { accessToken: jwt.sign(user, access, {expiresIn: accExpDate}), refreshToken: jwt.sign(user, refresh, {expiresIn: reExpDate}) }
+let generateToken = async (user: usr, key: string, ExpDate: string) =>  {
+    return jwt.sign(user, key, { expiresIn: ExpDate })
 }
 
-let storeREToken = async (refreshToken: string, user: User) => {
 
-    try {
-        let refreshRepo = await appDataSource.getRepository(RefreshToken)
-        let newREtoken = new RefreshToken()
-        newREtoken.token = refreshToken
-        newREtoken.user = user
-        await refreshRepo.save(newREtoken)
-    } catch (err) {
-        console.log(err)
-    }
+let createToken = (token: string, user: User) => {
+    let newToken = new RefreshToken()
+    newToken.token = token
+    newToken.user = user
+    return newToken 
 }
 
 
@@ -54,5 +65,6 @@ let storeREToken = async (refreshToken: string, user: User) => {
 export {
     authToken,
     generateToken,
-    storeREToken
+    createToken,
+    authMiddleware
 }

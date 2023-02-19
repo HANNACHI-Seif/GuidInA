@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, Length } from "class-validator"
-import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn } from "typeorm"
 import Post from './post'
+import RefreshToken from "./refreshToken"
 
 
 @Entity()
@@ -29,6 +30,10 @@ export default class User {
 
     @Column("boolean", {default: false})
     isAdmin: boolean
+
+    @OneToMany(() => RefreshToken, token => token.user)
+    @JoinColumn()
+    tokens: RefreshToken[]
 
     
 }
