@@ -3,10 +3,12 @@ import appDataSource from "./ormconfig"
 import User from "./entities/user";
 import cookieParser from 'cookie-parser';
 import jwt from "jsonwebtoken"
-import { authMiddleware, authToken, createToken, generateToken } from "./utilities/token";
+import { authMiddleware, authToken, createToken, deleteToken, generateToken } from "./utilities/token";
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
-import { createUser, saveToDB } from "./controllers/user.controller";
+import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
+import { savePost } from "./controllers/post.constroller";
+import bcrypt from "bcrypt"
 require("dotenv").config();
 
 //routes
@@ -19,13 +21,13 @@ require("dotenv").config();
     app.use(express.json())
     app.use(cookieParser())
 
-    app.listen(3000, () => console.log("listening..."))
+    app.listen(process.env.PORT, () => console.log("listening..."))
 
     //testing routes:
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { tokens: true } })
+            let users = await userRepo.find({ relations: { tokens: true, posts: true } })
             res.json({users})
         } catch (err) {
             console.log(err);
@@ -55,12 +57,47 @@ require("dotenv").config();
             let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
             let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             let newToken = createToken(refresh, newUser)
-            //saving to database
-            saveToDB(newUser, newToken)
+            //saving to database & response 
+            await saveToDB(newUser, newToken)
             res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
         } catch (error) {
             console.log(error)
             res.json({ msg: "could not add user" })
+        }
+
+    })
+
+    app.post('/login', async (req: Request, res: Response) => {
+        let { username, password } = req.body
+        let userByUsername = await fetchUserByusrn(username)
+        if (!userByUsername) res.json({ msg: "uncorrect username or password" })
+        if (await bcrypt.compare(password, userByUsername!.password)) {
+            //creating access&refresh token
+            let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
+            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            let newToken = createToken(refresh, userByUsername!)
+            //savivng to db & response
+            await saveToDB(userByUsername!, newToken)
+            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
+        } else {
+            res.json({ msg: "uncorrect username or password" })
+        }
+    })
+
+    //logout
+    app.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let refreshToken = req.cookies.jwt
+            let user = await fetchUser(req.body.user.id)
+            //updating user
+            user?.tokens.filter((token) => token !== refreshToken)
+            appDataSource.manager.save(user)
+            //deleting token from db
+            await deleteToken(refreshToken)
+            res.json({ msg: "logged out successfuly" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "something went wrong" })
         }
 
     })
@@ -92,45 +129,25 @@ require("dotenv").config();
             }
         }
         }
-        
-
     })
 
-    /*
-    app.post('/addPost', async (req: Request, res: Response) => {
-        let authHeader = req.headers['authorization']
-        let token = authHeader?.split(' ')[1] //bearer token, 1 represents token
-        if (!token) {
-            res.json({ msg: "unauthorized" })
-        } else {
-            let user = await authToken(token, process.env.ACCESS_TOKEN_SECRET!)
-            if (!user) {
-                res.json({ msg: "unvalid token" })
-            } else { 
-                try {
-                    let newPost = new Post()
-                    newPost.caption = req.body.caption
-                    newPost.imageUrl = req.body.imageUrl
-                    newPost.user = user
-                    await appDataSource.manager.save(newPost)
-                    res.json({ msg: "post added successfuly" })
-                } catch (err) {
-                    console.log(err);
-                    res.json({ msg: "could not add post" })
-                }
-            }
+
+   app.post('/addPost', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let { caption, imageUrl, user } = req.body
+            await savePost(caption, imageUrl, user)
+            res.json({ msg: "post added successfuly" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not add post" })
         }
-    })
-    */
-   app.post('/addPost', authMiddleware, (req: Request, res: Response) => {
-        
    })
 
 
-    app.get('/allPosts', authMiddleware, (req: Request, res: Response) => {
+    app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
         try {
             let postRepo = appDataSource.getRepository(Post)
-            let posts = postRepo.find()
+            let posts = await postRepo.find()
             res.json({ posts })
         } catch (error) {
             console.log(error)

@@ -17,7 +17,8 @@ let saveToDB = async(user: User, token: RefreshToken) => {
     let userRepo = appDataSource.getRepository(User)
     let tokenRepo = appDataSource.getRepository(RefreshToken)
     try {
-        user.tokens = [token]
+        user.tokens = []
+        user.tokens.push(token)
         await userRepo.save(user)
         await tokenRepo.save(token)
     } catch (error) {
@@ -25,7 +26,19 @@ let saveToDB = async(user: User, token: RefreshToken) => {
     }
 }
 
+let fetchUser = (id: string) => {
+    let userRepo = appDataSource.getRepository(User)
+    return userRepo.findOne({ where: { id: id }, relations: { tokens: true } })
+}
+
+let fetchUserByusrn = (username: string) => {
+    let userRepo = appDataSource.getRepository(User)
+    return userRepo.findOne({ where: { username: username } })
+}
+
 export {
     createUser,
-    saveToDB
+    saveToDB, 
+    fetchUser,
+    fetchUserByusrn
 }

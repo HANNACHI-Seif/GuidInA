@@ -58,6 +58,11 @@ let createToken = (token: string, user: User) => {
     return newToken 
 }
 
+let deleteToken = async(token: string) => {
+    let tokenRepo = appDataSource.getRepository(RefreshToken)
+    await tokenRepo.delete({ token: token })
+}
+
 
     
 
@@ -66,5 +71,6 @@ export {
     authToken,
     generateToken,
     createToken,
-    authMiddleware
+    authMiddleware,
+    deleteToken
 }
