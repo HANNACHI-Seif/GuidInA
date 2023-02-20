@@ -41,6 +41,22 @@ let authMiddleware = async (req: Request, res: Response, next: NextFunction) => 
     }
   }
 
+
+let refreshMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    let refreshToken = req.cookies.jwt
+    try {
+        if (!refreshToken) throw new Error("Unauthorized")
+        let user = await authToken(refreshToken, process.env.REFRESH_TOKEN_SECRET!)
+        let storedToken = await fetchToken(refreshToken)
+        if (!user || !storedToken || storedToken.user.id !== user.id) throw new Error("Unvalid token, please login and try again")
+        req.body.user = user
+        next()
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "unauthorized, please login" })
+    }
+}
+
 interface usr {
     id: string,
 }
@@ -63,6 +79,11 @@ let deleteToken = async(token: string) => {
     await tokenRepo.delete({ token: token })
 }
 
+let fetchToken = (token: string) => {
+    let tokenRepo = appDataSource.getRepository(RefreshToken)
+    return tokenRepo.findOne({ relations: {user: true } , where: {token: token} })
+}
+
 
     
 
@@ -72,5 +93,7 @@ export {
     generateToken,
     createToken,
     authMiddleware,
-    deleteToken
+    deleteToken,
+    fetchToken,
+    refreshMiddleware
 }

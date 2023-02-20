@@ -3,7 +3,7 @@ import appDataSource from "./ormconfig"
 import User from "./entities/user";
 import cookieParser from 'cookie-parser';
 import jwt from "jsonwebtoken"
-import { authMiddleware, authToken, createToken, deleteToken, generateToken } from "./utilities/token";
+import { authMiddleware, authToken, createToken, deleteToken, fetchToken, generateToken, refreshMiddleware } from "./utilities/token";
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
 import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
@@ -55,7 +55,7 @@ require("dotenv").config();
             let newUser = await createUser(username, password, email)
             //creating access&refresh token
             let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
-            let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1m')
             let newToken = createToken(refresh, newUser)
             //saving to database & response 
             await saveToDB(newUser, newToken)
@@ -74,7 +74,7 @@ require("dotenv").config();
         if (await bcrypt.compare(password, userByUsername!.password)) {
             //creating access&refresh token
             let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
-            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1m')
             let newToken = createToken(refresh, userByUsername!)
             //savivng to db & response
             await saveToDB(userByUsername!, newToken)
@@ -94,7 +94,7 @@ require("dotenv").config();
             appDataSource.manager.save(user)
             //deleting token from db
             await deleteToken(refreshToken)
-            res.json({ msg: "logged out successfuly" })
+            res.json({ msg: "logged out successfuly" }).clearCookie('jwt')
         } catch (error) {
             console.log(error)
             res.json({ msg: "something went wrong" })
@@ -102,36 +102,21 @@ require("dotenv").config();
 
     })
 
-    app.post('/refresh', async (req: Request, res: Response) => {
-        //let refreshToken = req.cookies.jwt
-        let refreshToken = req.body.refreshToken
-        if (!refreshToken) res.json({ msg: "unauthorized" })
-        else {
-            let decoded = await authToken(refreshToken, process.env.REFRESH_TOKEN_SECRET!)
-            if (!decoded) {
-            res.json({ msg: "unvalid token" })
-            } else {
-            //verify if user exist
-            try {
-                //refresh token verification
-                let userRepo = await appDataSource.getRepository(User)
-                let user = await userRepo.findOne({ where: { id: decoded.id } })
-                let refreshRepo = await appDataSource.getRepository(RefreshToken)
-                let storedREtoken = await refreshRepo.findOne({ relations: {user: true } , where: {token: refreshToken} })
-                if (!user || !storedREtoken || user.id !== storedREtoken.user.id) res.json({msg: "unauthorized, please login"})
-                //refreshing token
-                let data = { username: user?.username, email: user?.email, id: user?.id }
-                let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1m' })
-                res.json({ accessToken: newAccessToken, msg: "token refreshed"})
-            } catch (err) {
-                console.log(err)
-                res.json({ msg: "unauthorized" })
-            }
-        }
+    //refresh accessToken route
+    app.post('/refresh', refreshMiddleware,  (req: Request, res: Response) => {
+        try {
+            let user = req.body.user
+            //refreshing token
+            let data = { id: user.id }
+            let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1m' })
+            res.json({ newAccessToken, msg: "token refreshed" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "something went wrong" })
         }
     })
 
-
+    //add post
    app.post('/addPost', authMiddleware, async (req: Request, res: Response) => {
         try {
             let { caption, imageUrl, user } = req.body
@@ -143,7 +128,7 @@ require("dotenv").config();
         }
    })
 
-
+   //get all posts
     app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
         try {
             let postRepo = appDataSource.getRepository(Post)
