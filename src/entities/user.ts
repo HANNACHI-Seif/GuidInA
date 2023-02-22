@@ -3,6 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn }
 import Post from './post'
 import Like from "./like"
 import RefreshToken from "./refreshToken"
+import Comment from "./comment"
 
 
 @Entity()
@@ -31,6 +32,11 @@ export default class User {
 
     @OneToMany(() => Like, like => like.user)
     likes: Like[]
+
+    @OneToMany(() => Comment, comment => comment.user)
+    comments: Comment[]
+
+    
 
     @Column("boolean", {default: false})
     isAdmin: boolean

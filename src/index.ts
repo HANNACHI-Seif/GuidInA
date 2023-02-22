@@ -7,7 +7,7 @@ import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddlew
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
 import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
-import {  fetchLike, fetchPost, savePost, saveLike, deleteLike } from "./controllers/post.constroller";
+import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment } from "./controllers/post.constroller";
 import bcrypt from "bcrypt"
 import Like from "./entities/like"
 require("dotenv").config();
@@ -140,11 +140,28 @@ require("dotenv").config();
         }
    })
 
+
+   /*
+   app.delete('/post/:id', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let user: User = req.body.user
+            let postToDelete = await fetchPost(req.params.id)
+            if (!postToDelete) throw new Error("post not found!")
+            if (postToDelete.user.id !== user.id) throw new Error("Unauthorized")
+            //delete
+            await appDataSource.manager.remove(postToDelete)
+            res.json({ msg: "post deleted" })
+        } catch (error) {
+            console.log(error)
+            res.json({ "unauthorized" })
+        }
+   })*/
+
    //get all posts
     app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
         try {
             let postRepo = appDataSource.getRepository(Post)
-            let posts = await postRepo.find({ relations: { likes: true } })
+            let posts = await postRepo.find({ relations: { likes: true, comments: true } })
             res.json({ posts })
         } catch (error) {
             console.log(error)
@@ -153,7 +170,7 @@ require("dotenv").config();
     })
 
 
-    
+    //like post
     app.post('/post/:id/like', authMiddleware, async (req: Request, res: Response) => {
         try {
             let user: User = req.body.user
@@ -163,8 +180,7 @@ require("dotenv").config();
             let like = await fetchLike(user.id)
             if (!like) {
                 //Like
-                user.likes.push(await saveLike(user, post))
-                appDataSource.manager.save(user)
+                saveLike(user, post)
                 res.json({ msg: "liked" })
             } else {
                 //dislike
@@ -174,6 +190,39 @@ require("dotenv").config();
         } catch (error) {
             console.log(error)
             res.json({msg: "something went wrong"})
+        }
+    })
+    
+    //comment on post
+    app.post('/post/:id/comment', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let { user, text }: { user: User, text: string } = req.body
+            let post = await fetchPost(req.params.id)
+            if (!post) throw new Error("something went wrong")
+            saveComment(user, post!, text)
+            res.json({ msg: "comment added" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "failed" })
+        }
+    })
+
+    //delete comment
+    app.delete('/post/:postId/comments/:commentId', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let user: User = req.body.user
+            let post = await fetchPost(req.params.postId)
+            let comment = await fetchComment(req.params.commentId)
+            if (!post || !comment) throw new Error("something went wrong")
+            let commentInPost = post.comments.some((postComments) => postComments?.id == comment!.id)
+            if (!commentInPost) throw new Error("unauthorized")
+            if (user.isAdmin || user.id == comment.user.id || user.id == post.user.id) {
+                appDataSource.manager.remove(comment)
+                res.json({ msg: "deleted" })
+            }
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not delete comment" })
         }
     })
 

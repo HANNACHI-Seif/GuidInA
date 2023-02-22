@@ -29,7 +29,7 @@ let saveToDB = async(user: User, token: RefreshToken) => {
 
 let fetchUser = (id: string) => {
     let userRepo = appDataSource.getRepository(User)
-    return userRepo.findOne({ where: { id: id }, relations: { tokens: true, likes: true } })
+    return userRepo.findOne({ where: { id: id } })// NEED TO BE TRUE: likes, 
 }
 
 let fetchUserByusrn = (username: string) => {

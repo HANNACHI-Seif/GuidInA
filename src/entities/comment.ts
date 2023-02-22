@@ -12,7 +12,7 @@ export default class Comment {
     @Column()
     text: string
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, user => user.comments)
     user: User
 
     @ManyToOne(() => Post)

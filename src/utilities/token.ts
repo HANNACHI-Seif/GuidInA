@@ -13,8 +13,8 @@ interface DecodedToken {
 
 let authToken = async (token: string, secret: string) => {
     try {
-        let userId: DecodedToken = jwt.verify(token, secret) as DecodedToken;
-        let user = await fetchUser(userId.id)
+        let data: DecodedToken = jwt.verify(token, secret) as DecodedToken;
+        let user = await fetchUser(data.id)
         return user;
     }
     catch (err) {
