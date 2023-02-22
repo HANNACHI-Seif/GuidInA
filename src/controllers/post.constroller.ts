@@ -12,6 +12,7 @@ let savePost = (caption: string, imageUrl: string, user: User) => {
     newPost.imageUrl = imageUrl
     newPost.user = user
     newPost.likes = []
+    newPost.comments = []
     return appDataSource.manager.save(newPost)
 }
 
@@ -54,6 +55,11 @@ let saveComment = (user: User, post: Post, text: string) => {
     commentRepo.save(newComment)
 }
 
+let deleteComment = (id: string) => {
+    let commentRepo = appDataSource.getRepository(Comment)
+    commentRepo.delete({ id: id })
+}
+
 export {
     savePost,
     fetchPost,
@@ -61,5 +67,6 @@ export {
     saveLike,
     deleteLike,
     saveComment,
-    fetchComment
+    fetchComment,
+    deleteComment
 }

@@ -7,7 +7,7 @@ import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddlew
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
 import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
-import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment } from "./controllers/post.constroller";
+import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment, deleteComment } from "./controllers/post.constroller";
 import bcrypt from "bcrypt"
 import Like from "./entities/like"
 require("dotenv").config();
@@ -28,7 +28,7 @@ require("dotenv").config();
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { likes: true } })
+            let users = await userRepo.find({ relations: { likes: true, comments: true } })
             res.json({users})
         } catch (err) {
             console.log(err);
@@ -141,21 +141,25 @@ require("dotenv").config();
    })
 
 
-   /*
+   //delete post
    app.delete('/post/:id', authMiddleware, async (req: Request, res: Response) => {
         try {
             let user: User = req.body.user
             let postToDelete = await fetchPost(req.params.id)
             if (!postToDelete) throw new Error("post not found!")
-            if (postToDelete.user.id !== user.id) throw new Error("Unauthorized")
+            if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
             //delete
-            await appDataSource.manager.remove(postToDelete)
+            let likes = postToDelete.likes
+            let comments = postToDelete.comments
+            comments.forEach((comment) => deleteComment(comment.id))
+            appDataSource.manager.remove(postToDelete)
+            likes.forEach((like) => deleteLike(like.id))
             res.json({ msg: "post deleted" })
         } catch (error) {
             console.log(error)
-            res.json({ "unauthorized" })
+            res.json({ msg: "unauthorized" })
         }
-   })*/
+   })
 
    //get all posts
     app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
@@ -217,7 +221,7 @@ require("dotenv").config();
             let commentInPost = post.comments.some((postComments) => postComments?.id == comment!.id)
             if (!commentInPost) throw new Error("unauthorized")
             if (user.isAdmin || user.id == comment.user.id || user.id == post.user.id) {
-                appDataSource.manager.remove(comment)
+                deleteComment(comment.id)
                 res.json({ msg: "deleted" })
             }
         } catch (error) {
