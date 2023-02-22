@@ -3,12 +3,13 @@ import appDataSource from "./ormconfig"
 import User from "./entities/user";
 import cookieParser from 'cookie-parser';
 import jwt from "jsonwebtoken"
-import { authMiddleware, authToken, createToken, deleteToken, fetchToken, generateToken, refreshMiddleware } from "./utilities/token";
+import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddleware } from "./utilities/token";
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
 import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
-import { savePost } from "./controllers/post.constroller";
+import {  fetchLike, fetchPost, savePost, saveLike, deleteLike } from "./controllers/post.constroller";
 import bcrypt from "bcrypt"
+import Like from "./entities/like"
 require("dotenv").config();
 
 //routes
@@ -27,7 +28,7 @@ require("dotenv").config();
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { tokens: true, posts: true } })
+            let users = await userRepo.find({ relations: { likes: true } })
             res.json({users})
         } catch (err) {
             console.log(err);
@@ -46,6 +47,17 @@ require("dotenv").config();
         }   
     })
 
+    app.get('/allLikes', async (req: Request, res: Response) => {
+        try {
+            let likeRepo = appDataSource.getRepository(Like)
+            let likes = await likeRepo.find()
+            res.json({ likes })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch likes" })
+        }
+    })
+
 
     //routes
     app.post('/register', async (req: Request, res: Response) => {
@@ -55,7 +67,7 @@ require("dotenv").config();
             let newUser = await createUser(username, password, email)
             //creating access&refresh token
             let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
-            let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1m')
+            let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             let newToken = createToken(refresh, newUser)
             //saving to database & response 
             await saveToDB(newUser, newToken)
@@ -70,11 +82,11 @@ require("dotenv").config();
     app.post('/login', async (req: Request, res: Response) => {
         let { username, password } = req.body
         let userByUsername = await fetchUserByusrn(username)
-        if (!userByUsername) res.json({ msg: "uncorrect username or password" })
+        if (!userByUsername) res.json({ msg: "uncorrect username or plogassword" })
         if (await bcrypt.compare(password, userByUsername!.password)) {
             //creating access&refresh token
             let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
-            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1m')
+            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             let newToken = createToken(refresh, userByUsername!)
             //savivng to db & response
             await saveToDB(userByUsername!, newToken)
@@ -108,7 +120,7 @@ require("dotenv").config();
             let user = req.body.user
             //refreshing token
             let data = { id: user.id }
-            let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1m' })
+            let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1d' })
             res.json({ newAccessToken, msg: "token refreshed" })
         } catch (error) {
             console.log(error)
@@ -132,11 +144,36 @@ require("dotenv").config();
     app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
         try {
             let postRepo = appDataSource.getRepository(Post)
-            let posts = await postRepo.find()
+            let posts = await postRepo.find({ relations: { likes: true } })
             res.json({ posts })
         } catch (error) {
             console.log(error)
             res.json({ msg: "could not fetch posts" })
+        }
+    })
+
+
+    
+    app.post('/post/:id/like', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let user: User = req.body.user
+            let post = await fetchPost(req.params.id)
+            if (!post) throw new Error("post not found!")
+            //checking if already liked, and dislike if so
+            let like = await fetchLike(user.id)
+            if (!like) {
+                //Like
+                user.likes.push(await saveLike(user, post))
+                appDataSource.manager.save(user)
+                res.json({ msg: "liked" })
+            } else {
+                //dislike
+                deleteLike(like.id)
+                res.json({ msg: "disliked" })
+            }
+        } catch (error) {
+            console.log(error)
+            res.json({msg: "something went wrong"})
         }
     })
 

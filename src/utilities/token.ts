@@ -3,6 +3,7 @@ import appDataSource from "../ormconfig"
 import User from "../entities/user";
 import RefreshToken from "../entities/refreshToken";
 import { Request, Response, NextFunction } from "express";
+import { fetchUser } from "../controllers/user.controller";
 require("dotenv").config();
 
 
@@ -13,8 +14,7 @@ interface DecodedToken {
 let authToken = async (token: string, secret: string) => {
     try {
         let userId: DecodedToken = jwt.verify(token, secret) as DecodedToken;
-        let userRepo = appDataSource.getRepository(User)
-        let user = await userRepo.findOne({ where: { id: userId.id } })
+        let user = await fetchUser(userId.id)
         return user;
     }
     catch (err) {
@@ -48,7 +48,11 @@ let refreshMiddleware = async (req: Request, res: Response, next: NextFunction) 
         if (!refreshToken) throw new Error("Unauthorized")
         let user = await authToken(refreshToken, process.env.REFRESH_TOKEN_SECRET!)
         let storedToken = await fetchToken(refreshToken)
-        if (!user || !storedToken || storedToken.user.id !== user.id) throw new Error("Unvalid token, please login and try again")
+        if (!user) {
+            await appDataSource.manager.remove(storedToken)
+            throw new Error("Unvalid token, please login and try again")
+        }
+        if (!storedToken || storedToken.user.id !== user!.id) throw new Error("Unvalid token, please login and try again")
         req.body.user = user
         next()
     } catch (error) {

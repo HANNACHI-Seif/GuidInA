@@ -18,6 +18,7 @@ let saveToDB = async(user: User, token: RefreshToken) => {
     let tokenRepo = appDataSource.getRepository(RefreshToken)
     try {
         if (!user.tokens) user.tokens = []
+        if (!user.likes) user.likes = []
         user.tokens.push(token)
         await userRepo.save(user)
         await tokenRepo.save(token)
@@ -28,7 +29,7 @@ let saveToDB = async(user: User, token: RefreshToken) => {
 
 let fetchUser = (id: string) => {
     let userRepo = appDataSource.getRepository(User)
-    return userRepo.findOne({ where: { id: id }, relations: { tokens: true } })
+    return userRepo.findOne({ where: { id: id }, relations: { tokens: true, likes: true } })
 }
 
 let fetchUserByusrn = (username: string) => {

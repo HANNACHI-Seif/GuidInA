@@ -8,7 +8,7 @@ export default class Like {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @ManyToOne( () => User, user => user.posts)
+    @ManyToOne( () => User, user => user.likes)
     user: User
 
     @ManyToOne(() => Post)

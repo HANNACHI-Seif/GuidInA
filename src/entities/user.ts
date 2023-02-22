@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, Length } from "class-validator"
 import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn } from "typeorm"
 import Post from './post'
+import Like from "./like"
 import RefreshToken from "./refreshToken"
 
 
@@ -27,6 +28,9 @@ export default class User {
 
     @OneToMany( () => Post, post => post.user)
     posts: Post[]
+
+    @OneToMany(() => Like, like => like.user)
+    likes: Like[]
 
     @Column("boolean", {default: false})
     isAdmin: boolean
