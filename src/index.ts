@@ -13,6 +13,7 @@ import Like from "./entities/like"
 import Comment from "./entities/comment";
 import upload from "./utilities/img";
 import fs from 'fs'
+import { generateHash } from "./utilities/hash";
 require("dotenv").config();
 
 //routes
@@ -127,6 +128,22 @@ require("dotenv").config();
             res.json({ msg: "something went wrong" })
         }
 
+    })
+
+    //edit password
+    app.patch('/passwd', authMiddleware, async (req: Request, res: Response) => {
+        let { oldPassword, newPassword, user }: { oldPassword: string, newPassword: string, user: User } = req.body
+        try {
+            if (await bcrypt.compare(oldPassword, user.password)) {
+                //setting a new password
+                user.password = await generateHash(newPassword)
+                appDataSource.manager.save(user)
+                res.json({ msg: "password updated successfuly" })
+            } else throw new Error("wrong old password")
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not update password" })
+        }
     })
 
     //refresh accessToken route
