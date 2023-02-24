@@ -162,11 +162,11 @@ require("dotenv").config();
             if (!postToDelete) throw new Error("post not found!")
             if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
             //delete
-            let likes = postToDelete.likes
-            let comments = postToDelete.comments
-            comments.forEach((comment) => deleteComment(comment.id))
+            //let likes = postToDelete.likes
+            //let comments = postToDelete.comments
+            //comments.forEach((comment) => deleteComment(comment.id))
             appDataSource.manager.remove(postToDelete)
-            likes.forEach((like) => deleteLike(like.id))
+            //likes.forEach((like) => deleteLike(like.id))
             res.json({ msg: "post deleted" })
         } catch (error) {
             console.log(error)
