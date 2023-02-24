@@ -6,10 +6,11 @@ import jwt from "jsonwebtoken"
 import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddleware } from "./utilities/token";
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
-import { createUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
+import { createUser, deleteUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
 import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment, deleteComment } from "./controllers/post.constroller";
 import bcrypt from "bcrypt"
 import Like from "./entities/like"
+import Comment from "./entities/comment";
 require("dotenv").config();
 
 //routes
@@ -28,7 +29,7 @@ require("dotenv").config();
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { likes: true, comments: true } })
+            let users = await userRepo.find({ relations: { likes: true, comments: true, tokens: true, posts: true} })
             res.json({users})
         } catch (err) {
             console.log(err);
@@ -58,15 +59,26 @@ require("dotenv").config();
         }
     })
 
+    app.get('/allComments', async (req: Request, res: Response) => {
+        try {
+           let commentRepo = appDataSource.getRepository(Comment)
+           let comments = await commentRepo.find()
+           res.json({ comments })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch comments" })
+        }
+    })
+
 
     //routes
     app.post('/register', async (req: Request, res: Response) => {
         try {
             let { username, password, email } = req.body
             //creating new user
-            let newUser = await createUser(username, password, email)
+            let newUser = await createUser(username, password, email, false)
             //creating access&refresh token
-            let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
+            let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
             let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             let newToken = createToken(refresh, newUser)
             //saving to database & response 
@@ -79,6 +91,7 @@ require("dotenv").config();
 
     })
 
+    //login
     app.post('/login', async (req: Request, res: Response) => {
         let { username, password } = req.body
         let userByUsername = await fetchUserByusrn(username)
@@ -165,7 +178,7 @@ require("dotenv").config();
     app.get('/allPosts', authMiddleware, async (req: Request, res: Response) => {
         try {
             let postRepo = appDataSource.getRepository(Post)
-            let posts = await postRepo.find({ relations: { likes: true, comments: true } })
+            let posts = await postRepo.find({ relations: { likes: true, comments: true, user: true } })
             res.json({ posts })
         } catch (error) {
             console.log(error)
@@ -227,6 +240,36 @@ require("dotenv").config();
         } catch (error) {
             console.log(error)
             res.json({ msg: "could not delete comment" })
+        }
+    })
+
+    //admin routes
+
+    //admin add user
+    app.post('/admin/addUser', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let { user, username, password, email, isAdmin }: { user: User, username: string, password: string, email: string, isAdmin: boolean } = req.body
+            if (!user.isAdmin) throw new Error("Unauthorized")
+            //add user
+            let newUser = await createUser(username, password, email, isAdmin)
+            appDataSource.manager.save(newUser)
+            res.json({ msg: "user created" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not create user" })
+        }
+    })
+
+    //admin delete user
+    app.delete('/admin/deleteUser/:id', authMiddleware, (req: Request, res: Response) => {
+        try {
+            let { user }: { user: User, userToDeleteId: string } = req.body
+            if (!user.isAdmin) throw new Error("Unauthorized")
+            deleteUser(req.params.id)
+            res.json({ msg: "user deleted successfuly" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not delete user" })
         }
     })
 

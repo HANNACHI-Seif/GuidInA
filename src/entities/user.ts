@@ -27,13 +27,16 @@ export default class User {
     @IsNotEmpty({ message: "password is required"})
     password: string
 
-    @OneToMany( () => Post, post => post.user)
+    @OneToMany( () => Post, post => post.user, { cascade: true })
+    @JoinColumn()
     posts: Post[]
 
-    @OneToMany(() => Like, like => like.user)
+    @OneToMany(() => Like, like => like.user, { cascade: true })
+    @JoinColumn()
     likes: Like[]
 
-    @OneToMany(() => Comment, comment => comment.user)
+    @OneToMany(() => Comment, comment => comment.user, { cascade: true })
+    @JoinColumn()
     comments: Comment[]
 
     
@@ -41,7 +44,7 @@ export default class User {
     @Column("boolean", {default: false})
     isAdmin: boolean
 
-    @OneToMany(() => RefreshToken, token => token.user)
+    @OneToMany(() => RefreshToken, token => token.user, { cascade: true })
     @JoinColumn()
     tokens: RefreshToken[]
 

@@ -21,6 +21,11 @@ let fetchPost = (id: string) => {
     return postRepo.findOne({ where: { id: id }, relations: { likes: true, user: true, comments: true } })
 }
 
+let deletePost = (id: string) => {
+    let postRepo = appDataSource.getRepository(Post)
+    postRepo.delete({ id: id })
+}
+
 let fetchLike = async (userId: string) => {
     let likeRepo = appDataSource.getRepository(Like)
     let userlike = await fetchUser(userId)
@@ -63,6 +68,7 @@ let deleteComment = (id: string) => {
 export {
     savePost,
     fetchPost,
+    deletePost,
     fetchLike,
     saveLike,
     deleteLike,

@@ -4,32 +4,29 @@ import { generateHash } from "../utilities/hash"
 import appDataSource from "../ormconfig"
 
 
-let createUser = async (username: string, password: string, email: string) => {
+let createUser = async (username: string, password: string, email: string, admin: boolean) => {
     let newUser = new User()
     newUser.username = username
     newUser.email = email
+    newUser.isAdmin = admin
     newUser.password = (await generateHash(password))!
     let userRepo = appDataSource.getRepository(User)
     return await userRepo.save(newUser);
 }
 
 let saveToDB = async(user: User, token: RefreshToken) => {
-    let userRepo = appDataSource.getRepository(User)
     let tokenRepo = appDataSource.getRepository(RefreshToken)
     try {
-        if (!user.tokens) user.tokens = []
-        if (!user.likes) user.likes = []
-        user.tokens.push(token)
-        await userRepo.save(user)
+        token.user = user
         await tokenRepo.save(token)
     } catch (error) {
         console.log(error)
     }
 }
 
-let fetchUser = (id: string) => {
+let fetchUser = (id: string, obj = {}) => {
     let userRepo = appDataSource.getRepository(User)
-    return userRepo.findOne({ where: { id: id } })// NEED TO BE TRUE: likes, 
+    return userRepo.findOne({ where: { id: id }, relations: obj })
 }
 
 let fetchUserByusrn = (username: string) => {
@@ -37,9 +34,21 @@ let fetchUserByusrn = (username: string) => {
     return userRepo.findOne({ where: { username: username }, relations: { tokens: true } })
 }
 
+
+
+let deleteUser = async (id: string) => {
+    try {
+        let userRepo = appDataSource.getRepository(User)
+        userRepo.delete({ id: id })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 export {
     createUser,
     saveToDB, 
     fetchUser,
-    fetchUserByusrn
+    fetchUserByusrn,
+    deleteUser
 }

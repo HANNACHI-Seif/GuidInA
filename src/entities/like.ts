@@ -8,10 +8,10 @@ export default class Like {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @ManyToOne( () => User, user => user.likes)
+    @ManyToOne( () => User, user => user.likes, { onDelete: "CASCADE" })
     user: User
 
-    @ManyToOne(() => Post)
+    @ManyToOne(() => Post, post => post.likes, { onDelete: "CASCADE" })
     post: Post
 
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm"
 import User from "./user"
 import Like from "./like"
 import Comment from './comment'
@@ -15,13 +15,15 @@ export default class Post {
     @Column()
     imageUrl: string
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, user => user.posts, { onDelete: "CASCADE" })
     user: User
 
     @OneToMany( () => Comment, comment => comment.post)
+    @JoinColumn()
     comments: Comment[]
 
     @OneToMany( () => Like, like => like.post)
+    @JoinColumn()
     likes: Like[]
 
 }
