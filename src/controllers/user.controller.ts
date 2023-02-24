@@ -2,6 +2,8 @@ import RefreshToken from "../entities/refreshToken"
 import User from "../entities/user"
 import { generateHash } from "../utilities/hash"
 import appDataSource from "../ormconfig"
+import Post from "../entities/post"
+import fs from 'fs'
 
 
 let createUser = async (username: string, password: string, email: string, admin: boolean) => {
@@ -39,6 +41,14 @@ let fetchUserByusrn = (username: string) => {
 let deleteUser = async (id: string) => {
     try {
         let userRepo = appDataSource.getRepository(User)
+        let postRepo = appDataSource.getRepository(Post)
+        let userToDelete = await userRepo.findOne({ where: { id: id }, relations: { posts: true } })
+        if (userToDelete!.posts) userToDelete?.posts.forEach((post) => {
+            postRepo.delete({ id: id })
+            if (fs.existsSync(post.imageUrl)) {
+                fs.unlinkSync(post.imageUrl);
+            }
+        })
         userRepo.delete({ id: id })
     } catch (error) {
         console.log(error)

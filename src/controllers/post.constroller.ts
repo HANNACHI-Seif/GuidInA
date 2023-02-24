@@ -6,7 +6,7 @@ import appDataSource from '../ormconfig'
 import { fetchUser } from "./user.controller"
 
 
-let savePost = (caption: string, imageUrl: string, user: User) => {
+let savePost = (caption: string, imageUrl: string = '', user: User) => {
     let newPost = new Post()
     newPost.caption = caption
     newPost.imageUrl = imageUrl

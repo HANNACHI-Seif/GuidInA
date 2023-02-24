@@ -11,6 +11,8 @@ import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fet
 import bcrypt from "bcrypt"
 import Like from "./entities/like"
 import Comment from "./entities/comment";
+import upload from "./utilities/img";
+import fs from 'fs'
 require("dotenv").config();
 
 //routes
@@ -142,9 +144,10 @@ require("dotenv").config();
     })
 
     //add post
-   app.post('/addPost', authMiddleware, async (req: Request, res: Response) => {
+   app.post('/addPost', upload.single("image"), authMiddleware, async (req: Request, res: Response) => {
         try {
-            let { caption, imageUrl, user } = req.body
+            let { caption, user } = req.body
+            let imageUrl = req.file?.path
             await savePost(caption, imageUrl, user)
             res.json({ msg: "post added successfuly" })
         } catch (error) {
@@ -162,11 +165,10 @@ require("dotenv").config();
             if (!postToDelete) throw new Error("post not found!")
             if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
             //delete
-            //let likes = postToDelete.likes
-            //let comments = postToDelete.comments
-            //comments.forEach((comment) => deleteComment(comment.id))
             appDataSource.manager.remove(postToDelete)
-            //likes.forEach((like) => deleteLike(like.id))
+            if (fs.existsSync(postToDelete.imageUrl)) {
+                fs.unlinkSync(postToDelete.imageUrl);
+            }
             res.json({ msg: "post deleted" })
         } catch (error) {
             console.log(error)
