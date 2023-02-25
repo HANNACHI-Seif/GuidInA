@@ -3,7 +3,7 @@ import appDataSource from "../ormconfig"
 import User from "../entities/user";
 import RefreshToken from "../entities/refreshToken";
 import { Request, Response, NextFunction } from "express";
-import { fetchUser } from "../controllers/user.controller";
+import { fetchUser } from "../middleware/user.middleware";
 require("dotenv").config();
 
 

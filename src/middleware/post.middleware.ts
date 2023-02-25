@@ -3,7 +3,7 @@ import Post from "../entities/post"
 import Like from "../entities/like"
 import Comment from "../entities/comment"
 import appDataSource from '../ormconfig'
-import { fetchUser } from "./user.controller"
+import { fetchUser } from "./user.middleware"
 
 
 let savePost = (caption: string, imageUrl: string = '', user: User) => {
@@ -16,9 +16,9 @@ let savePost = (caption: string, imageUrl: string = '', user: User) => {
     return appDataSource.manager.save(newPost)
 }
 
-let fetchPost = (id: string) => {
+let fetchPost = (id: string, obj = {}) => {
     let postRepo = appDataSource.getRepository(Post)
-    return postRepo.findOne({ where: { id: id }, relations: { likes: true, user: true, comments: true } })
+    return postRepo.findOne({ where: { id: id }, relations: obj })
 }
 
 let deletePost = (id: string) => {
@@ -26,10 +26,10 @@ let deletePost = (id: string) => {
     postRepo.delete({ id: id })
 }
 
-let fetchLike = async (userId: string) => {
+let fetchLike = async (userId: string, post: Post) => {
     let likeRepo = appDataSource.getRepository(Like)
     let userlike = await fetchUser(userId)
-    return likeRepo.findOne({ relations: { user: true }, where: { user: userlike! } })
+    return likeRepo.findOne({ relations: { user: true, post: true }, where: { user: userlike!, post: post } })
 }
 
 let deleteLike = async (id: string) => {

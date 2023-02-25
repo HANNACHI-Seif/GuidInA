@@ -55,10 +55,19 @@ let deleteUser = async (id: string) => {
     }
 }
 
+let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean) => {
+    if (newUsername) userToEdit.username = newUsername
+    if (newEmail) userToEdit.email = newEmail
+    if (newPassword) userToEdit.password = await generateHash(newPassword)
+    userToEdit.isAdmin = isAdmin
+    appDataSource.manager.save(userToEdit)
+}
+
 export {
     createUser,
     saveToDB, 
     fetchUser,
     fetchUserByusrn,
-    deleteUser
+    deleteUser,
+    AdminEditUser
 }

@@ -6,14 +6,15 @@ import jwt from "jsonwebtoken"
 import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddleware } from "./utilities/token";
 import Post from "./entities/post";
 import RefreshToken from "./entities/refreshToken";
-import { createUser, deleteUser, fetchUser, fetchUserByusrn, saveToDB } from "./controllers/user.controller";
-import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment, deleteComment } from "./controllers/post.constroller";
+import { AdminEditUser, createUser, deleteUser, fetchUser, fetchUserByusrn, saveToDB } from "./middleware/user.middleware";
+import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment, deleteComment } from "./middleware/post.middleware";
 import bcrypt from "bcrypt"
 import Like from "./entities/like"
 import Comment from "./entities/comment";
 import upload from "./utilities/img";
 import fs from 'fs'
 import { generateHash } from "./utilities/hash";
+import authRoutes from './routes/authRoutes'
 require("dotenv").config();
 
 //routes
@@ -75,62 +76,10 @@ require("dotenv").config();
 
 
     //routes
-    app.post('/register', async (req: Request, res: Response) => {
-        try {
-            let { username, password, email } = req.body
-            //creating new user
-            let newUser = await createUser(username, password, email, false)
-            //creating access&refresh token
-            let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
-            let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-            let newToken = createToken(refresh, newUser)
-            //saving to database & response 
-            await saveToDB(newUser, newToken)
-            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not add user" })
-        }
+    app.use('/user', authRoutes)
+  
 
-    })
-
-    //login
-    app.post('/login', async (req: Request, res: Response) => {
-        let { username, password } = req.body
-        let userByUsername = await fetchUserByusrn(username)
-        if (!userByUsername) res.json({ msg: "uncorrect username or plogassword" })
-        if (await bcrypt.compare(password, userByUsername!.password)) {
-            //creating access&refresh token
-            let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
-            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-            let newToken = createToken(refresh, userByUsername!)
-            //savivng to db & response
-            await saveToDB(userByUsername!, newToken)
-            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-        } else {
-            res.json({ msg: "uncorrect username or password" })
-        }
-    })
-
-    //logout
-    app.post('/logout', authMiddleware, async (req: Request, res: Response) => {
-        try {
-            let refreshToken = req.cookies.jwt
-            let user = await fetchUser(req.body.user.id)
-            //updating user
-            user?.tokens.filter((token) => token !== refreshToken)
-            appDataSource.manager.save(user)
-            //deleting token from db
-            await deleteToken(refreshToken)
-            res.json({ msg: "logged out successfuly" }).clearCookie('jwt')
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "something went wrong" })
-        }
-
-    })
-
-    //edit password
+    //user edit password
     app.patch('/passwd', authMiddleware, async (req: Request, res: Response) => {
         let { oldPassword, newPassword, user }: { oldPassword: string, newPassword: string, user: User } = req.body
         try {
@@ -143,20 +92,6 @@ require("dotenv").config();
         } catch (error) {
             console.log(error)
             res.json({ msg: "could not update password" })
-        }
-    })
-
-    //refresh accessToken route
-    app.post('/refresh', refreshMiddleware,  (req: Request, res: Response) => {
-        try {
-            let user = req.body.user
-            //refreshing token
-            let data = { id: user.id }
-            let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1d' })
-            res.json({ newAccessToken, msg: "token refreshed" })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "something went wrong" })
         }
     })
 
@@ -178,7 +113,7 @@ require("dotenv").config();
    app.delete('/post/:id', authMiddleware, async (req: Request, res: Response) => {
         try {
             let user: User = req.body.user
-            let postToDelete = await fetchPost(req.params.id)
+            let postToDelete = await fetchPost(req.params.id, { user: true }) 
             if (!postToDelete) throw new Error("post not found!")
             if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
             //delete
@@ -213,7 +148,7 @@ require("dotenv").config();
             let post = await fetchPost(req.params.id)
             if (!post) throw new Error("post not found!")
             //checking if already liked, and dislike if so
-            let like = await fetchLike(user.id)
+            let like = await fetchLike(user.id, post)
             if (!like) {
                 //Like
                 saveLike(user, post)
@@ -228,6 +163,16 @@ require("dotenv").config();
             res.json({msg: "something went wrong"})
         }
     })
+
+    //all likes of a post
+    /*
+    app.get('/post/:id/likes', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let post = await fetchPost(req.params.id)
+        } catch (error) {
+            
+        }
+    }) */
     
     //comment on post
     app.post('/post/:id/comment', authMiddleware, async (req: Request, res: Response) => {
@@ -247,7 +192,7 @@ require("dotenv").config();
     app.delete('/post/:postId/comments/:commentId', authMiddleware, async (req: Request, res: Response) => {
         try {
             let user: User = req.body.user
-            let post = await fetchPost(req.params.postId)
+            let post = await fetchPost(req.params.postId, { comments: true, user: true })
             let comment = await fetchComment(req.params.commentId)
             if (!post || !comment) throw new Error("something went wrong")
             let commentInPost = post.comments.some((postComments) => postComments?.id == comment!.id)
@@ -263,7 +208,6 @@ require("dotenv").config();
     })
 
     //admin routes
-
     //admin add user
     app.post('/admin/addUser', authMiddleware, async (req: Request, res: Response) => {
         try {
@@ -291,6 +235,24 @@ require("dotenv").config();
             res.json({ msg: "could not delete user" })
         }
     })
+
+    //admin edit user
+    app.patch('/admin/edit/:id', authMiddleware, async (req: Request, res: Response) => {
+        try {
+            let { user, newUsername, newPassword, newEmail, isAdmin  }: { user: User, newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean } = req.body
+            if (user.isAdmin) {
+                //edit
+                let userToEdit = await fetchUser(req.params.id)
+                if (!userToEdit) throw new Error("user not found")
+                AdminEditUser(userToEdit, newUsername, newPassword, newEmail, isAdmin)
+                res.json({ msg: "user edited successfully" })
+            } else throw new Error("unauthorized")
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not edit user" })
+        }
+    })
+
 
 
 })()
