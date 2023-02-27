@@ -81,7 +81,6 @@ require("dotenv").config();
     //auth routes
     app.use('/user', authRoutes)
   
-
     //posts routes
     app.use('/post', postRoutes)
 

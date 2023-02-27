@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
-import City from "./city"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from "typeorm"
+import Image from "./image"
 
 @Entity()
 export default class Destination {
@@ -10,10 +10,13 @@ export default class Destination {
     name: string
 
     @Column()
+    city: string
+
+    @Column()
     description: string
 
-    @ManyToOne(() => City, city => city.destinations)
-    city: City
-
+    @ManyToMany(() => Image)
+    @JoinTable()
+    images: Image[]
 
 }

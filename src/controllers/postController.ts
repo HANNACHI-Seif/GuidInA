@@ -6,6 +6,7 @@ import User from "../entities/user";
 import Post from "../entities/post";
 import Comment from "../entities/comment";
 import Like from "../entities/like";
+import roles from "../constants/roles";
 
 
 
@@ -28,7 +29,7 @@ let delete_Post = async (req: Request, res: Response) => {
         let user: User = req.user!
         let postToDelete = await fetchPost(req.params.id, { user: true }) 
         if (!postToDelete) throw new Error("post not found!")
-        if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
+        if ((postToDelete.user.id !== user.id) && (user.role !== roles.ADMIN)) throw new Error("Unauthorized")
         //delete
         appDataSource.manager.remove(postToDelete)
         if (fs.existsSync(postToDelete.imageUrl)) {
@@ -97,12 +98,11 @@ let delete_Comment = async (req: Request, res: Response) => {
         let post = await fetchPost(req.params.postId, { comments: true, user: true })
         let comment = await fetchComment(req.params.commentId)
         if (!post || !comment) throw new Error("something went wrong")
-        let commentInPost = post.comments.some((postComments) => postComments?.id == comment!.id)
-        if (!commentInPost) throw new Error("unauthorized")
-        if (user.isAdmin || user.id == comment.user.id || user.id == post.user.id) {
-            deleteComment(comment.id)
-            res.json({ msg: "deleted" })
-        }
+        let commentInPost = post.comments.some((postComment) => postComment?.id == comment!.id)
+        if (!commentInPost || user.role !== roles.ADMIN || user.id !== comment.user.id || user.id !== post.user.id) throw new Error("unauthorized")
+        //delete
+        deleteComment(comment.id)
+        res.json({ msg: "deleted" })
     } catch (error) {
         console.log(error)
         res.json({ msg: "could not delete comment" })

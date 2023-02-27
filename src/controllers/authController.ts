@@ -3,7 +3,6 @@ import {  createToken, deleteToken, generateToken } from "../utilities/token";
 import { generateHash } from "../utilities/hash";
 import appDataSource from "../ormconfig"
 import { Request, Response } from "express";
-import User from "../entities/user";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 
@@ -16,7 +15,7 @@ let register_user = async (req: Request, res: Response) => {
     try {
         let { username, password, email } = req.body
         //creating new user
-        let newUser = await createUser(username, password, email, false)
+        let newUser = await createUser(username, password, email)
         //creating access&refresh token
         let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
         let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
@@ -38,7 +37,7 @@ let loginUser = async (req: Request, res: Response) => {
     if (!userByUsername) res.json({ msg: "uncorrect username or plogassword" })
     if (await bcrypt.compare(password, userByUsername!.password)) {
         //creating access&refresh token
-        let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '1d')
+        let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
         let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
         let newToken = createToken(refresh, userByUsername!)
         //savivng to db & response
@@ -81,7 +80,8 @@ let refreshAccessToken = (req: Request, res: Response) => {
 }
 
 let userEditPassword = async (req: Request, res: Response) => {
-    let { oldPassword, newPassword, user }: { oldPassword: string, newPassword: string, user: User } = req.body
+    let { oldPassword, newPassword }: { oldPassword: string, newPassword: string } = req.body
+    let user = req.user!
     try {
         if (await bcrypt.compare(oldPassword, user.password)) {
             //setting a new password

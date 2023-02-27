@@ -4,13 +4,14 @@ import { generateHash } from "../utilities/hash"
 import appDataSource from "../ormconfig"
 import Post from "../entities/post"
 import fs from 'fs'
+import  roles  from "../constants/roles"
 
 
-let createUser = async (username: string, password: string, email: string, admin: boolean) => {
+let createUser = async (username: string, password: string, email: string, role: string = roles.TOURIST) => {
     let newUser = new User()
     newUser.username = username
     newUser.email = email
-    newUser.isAdmin = admin
+    newUser.role = role
     newUser.password = (await generateHash(password))!
     let userRepo = appDataSource.getRepository(User)
     return await userRepo.save(newUser);
@@ -55,11 +56,11 @@ let deleteUser = async (id: string) => {
     }
 }
 
-let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean) => {
+let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: string, newEmail: string, newRole: string) => {
     if (newUsername) userToEdit.username = newUsername
     if (newEmail) userToEdit.email = newEmail
     if (newPassword) userToEdit.password = await generateHash(newPassword)
-    userToEdit.isAdmin = isAdmin
+    if (newRole) userToEdit.role = newRole
     appDataSource.manager.save(userToEdit)
 }
 

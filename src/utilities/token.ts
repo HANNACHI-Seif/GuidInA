@@ -69,8 +69,8 @@ interface usr {
 }
 
 
-let generateToken = async (user: usr, key: string, ExpDate: string) =>  {
-    return jwt.sign(user, key, { expiresIn: ExpDate })
+let generateToken = async (data: usr, key: string, ExpDate: string) =>  {
+    return jwt.sign(data, key, { expiresIn: ExpDate })
 }
 
 

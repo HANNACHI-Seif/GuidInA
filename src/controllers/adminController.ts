@@ -1,17 +1,17 @@
 import appDataSource from "../ormconfig"
 import { AdminEditUser, createUser, deleteUser, fetchUser } from "../middleware/user.middleware";
-import User from "../entities/user";
 import { Request, Response } from "express";
+import roles from "../constants/roles";
 
 
 
 let adminAddUser = async (req: Request, res: Response) => {
     try {
-        let { username, password, email, isAdmin }: { username: string, password: string, email: string, isAdmin: boolean } = req.body
+        let { username, password, email, role }: { username: string, password: string, email: string, role: string } = req.body
         let user = req.user!
-        if (!user.isAdmin) throw new Error("Unauthorized")
+        if (user.role !== roles.ADMIN) throw new Error("Unauthorized")
         //add user
-        let newUser = await createUser(username, password, email, isAdmin)
+        let newUser = await createUser(username, password, email, role)
         appDataSource.manager.save(newUser)
         res.json({ msg: "user created" })
     } catch (error) {
@@ -23,7 +23,7 @@ let adminAddUser = async (req: Request, res: Response) => {
 let adminDeleteUser = (req: Request, res: Response) => {
     try {
         let user = req.user!
-        if (!user.isAdmin) throw new Error("Unauthorized")
+        if (user.role !== roles.ADMIN) throw new Error("Unauthorized")
         deleteUser(req.params.id)
         res.json({ msg: "user deleted successfuly" })
     } catch (error) {
@@ -35,15 +35,14 @@ let adminDeleteUser = (req: Request, res: Response) => {
 
 let adminEditUser = async (req: Request, res: Response) => {
     try {
-        let { newUsername, newPassword, newEmail, isAdmin  }: { newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean } = req.body
+        let { newUsername, newPassword, newEmail, newRole  }: { newUsername: string, newPassword: string, newEmail: string, newRole: string } = req.body
         let user = req.user!
-        if (user.isAdmin) {
-            //edit
-            let userToEdit = await fetchUser(req.params.id)
-            if (!userToEdit) throw new Error("user not found")
-            AdminEditUser(userToEdit, newUsername, newPassword, newEmail, isAdmin)
-            res.json({ msg: "user edited successfully" })
-        } else throw new Error("unauthorized")
+        if (user.role !== roles.ADMIN) throw new Error("unauthorized")
+        //edit
+        let userToEdit = await fetchUser(req.params.id)
+        if (!userToEdit) throw new Error("user not found")
+        AdminEditUser(userToEdit, newUsername, newPassword, newEmail, newRole)
+        res.json({ msg: "user edited successfully" })
     } catch (error) {
         console.log(error)
         res.json({ msg: "could not edit user" })

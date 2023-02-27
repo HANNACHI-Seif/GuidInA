@@ -27,6 +27,9 @@ export default class User {
     @IsNotEmpty({ message: "password is required"})
     password: string
 
+    @Column()
+    role: string
+
     @OneToMany( () => Post, post => post.user, { cascade: true })
     @JoinColumn()
     posts: Post[]
@@ -38,11 +41,6 @@ export default class User {
     @OneToMany(() => Comment, comment => comment.user, { cascade: true })
     @JoinColumn()
     comments: Comment[]
-
-    
-
-    @Column("boolean", {default: false})
-    isAdmin: boolean
 
     @OneToMany(() => RefreshToken, token => token.user, { cascade: true })
     @JoinColumn()
