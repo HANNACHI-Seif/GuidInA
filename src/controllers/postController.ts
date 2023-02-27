@@ -10,7 +10,8 @@ import Post from "../entities/post";
 
 let addPost = async (req: Request, res: Response) => {
     try {
-        let { caption, user } = req.body
+        let { caption } = req.body
+        let user = req.user!
         let imageUrl = req.file?.path
         await savePost(caption, imageUrl, user)
         res.json({ msg: "post added successfuly" })
@@ -22,7 +23,7 @@ let addPost = async (req: Request, res: Response) => {
 
 let delete_Post = async (req: Request, res: Response) => {
     try {
-        let user: User = req.body.user
+        let user: User = req.user!
         let postToDelete = await fetchPost(req.params.id, { user: true }) 
         if (!postToDelete) throw new Error("post not found!")
         if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
@@ -53,7 +54,7 @@ let fetchAllPosts = async (req: Request, res: Response) => {
 
 let likePost = async (req: Request, res: Response) => {
     try {
-        let user: User = req.body.user
+        let user: User = req.user!
         let post = await fetchPost(req.params.id)
         if (!post) throw new Error("post not found!")
         //checking if already liked, and dislike if so
@@ -76,7 +77,8 @@ let likePost = async (req: Request, res: Response) => {
 
 let commentOnPost = async (req: Request, res: Response) => {
     try {
-        let { user, text }: { user: User, text: string } = req.body
+        let { text }: { text: string } = req.body
+        let user = req.user!
         let post = await fetchPost(req.params.id)
         if (!post) throw new Error("something went wrong")
         saveComment(user, post!, text)
@@ -89,7 +91,7 @@ let commentOnPost = async (req: Request, res: Response) => {
 
 let delete_Comment = async (req: Request, res: Response) => {
     try {
-        let user: User = req.body.user
+        let user: User = req.user!
         let post = await fetchPost(req.params.postId, { comments: true, user: true })
         let comment = await fetchComment(req.params.commentId)
         if (!post || !comment) throw new Error("something went wrong")

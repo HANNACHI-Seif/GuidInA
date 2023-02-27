@@ -8,9 +8,18 @@ import Comment from "./entities/comment";
 import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
+declare global {
+    namespace Express {
+      interface Request {
+        user?: User;
+      }
+    }
+  }
 require("dotenv").config();
 
 //routes
+
+
 (async() => {
     await appDataSource.initialize()
     

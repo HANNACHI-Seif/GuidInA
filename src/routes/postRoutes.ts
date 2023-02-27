@@ -6,7 +6,7 @@ import { addPost, commentOnPost, delete_Comment, delete_Post, fetchAllPosts, lik
 
 let router = express.Router()
 
-router.post('/share', upload.single("image"), authMiddleware,  addPost)
+router.post('/share', authMiddleware, upload.single("image"),  addPost)
 
 router.delete('/delete/:id', authMiddleware, delete_Post)
 

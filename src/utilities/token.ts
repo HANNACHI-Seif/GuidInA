@@ -24,6 +24,8 @@ let authToken = async (token: string, secret: string) => {
     }
 }
 
+
+
 let authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
         //checking token existance
@@ -34,12 +36,9 @@ let authMiddleware = async (req: Request, res: Response, next: NextFunction) => 
         let user = await authToken(token!, process.env.ACCESS_TOKEN_SECRET!)
         if (!user) throw new Error("unvalid token, please login and try again")
         //next...
-        req.body.user = user
+        req.user = user
         next()  
     } catch (error) {
-        if (fs.existsSync(req.file?.path!)) {
-            fs.unlinkSync(req.file?.path!);
-        }
         console.log(error)
         res.json({ msg: "unauthorized" })
     }
@@ -57,7 +56,7 @@ let refreshMiddleware = async (req: Request, res: Response, next: NextFunction) 
             throw new Error("Unvalid token, please login and try again")
         }
         if (!storedToken || storedToken.user.id !== user!.id) throw new Error("Unvalid token, please login and try again")
-        req.body.user = user
+        req.user = user
         next()
     } catch (error) {
         console.log(error)

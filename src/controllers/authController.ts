@@ -53,7 +53,7 @@ let logoutUser = async (req: Request, res: Response) => {
     try {
         let refreshToken = req.cookies.jwt
         if (!refreshToken) throw new Error("something went wrong")
-        let user = await fetchUser(req.body.user.id, { tokens: true })
+        let user = await fetchUser(req.user!.id, { tokens: true })
         //updating user
         user?.tokens.filter((token) => token !== refreshToken)
         appDataSource.manager.save(user)
@@ -69,7 +69,7 @@ let logoutUser = async (req: Request, res: Response) => {
 
 let refreshAccessToken = (req: Request, res: Response) => {
     try {
-        let user = req.body.user
+        let user = req.user!
         //refreshing token
         let data = { id: user.id }
         let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1d' })
