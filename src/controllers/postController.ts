@@ -1,0 +1,115 @@
+import { Request, Response } from "express";
+import {  fetchLike, fetchPost, savePost, saveLike, deleteLike, saveComment, fetchComment, deleteComment } from "../middleware/post.middleware";
+import appDataSource from "../ormconfig"
+import fs from 'fs'
+import User from "../entities/user";
+import Post from "../entities/post";
+
+
+
+
+let addPost = async (req: Request, res: Response) => {
+    try {
+        let { caption, user } = req.body
+        let imageUrl = req.file?.path
+        await savePost(caption, imageUrl, user)
+        res.json({ msg: "post added successfuly" })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not add post" })
+    }
+}
+
+let delete_Post = async (req: Request, res: Response) => {
+    try {
+        let user: User = req.body.user
+        let postToDelete = await fetchPost(req.params.id, { user: true }) 
+        if (!postToDelete) throw new Error("post not found!")
+        if ((postToDelete.user.id !== user.id) && !user.isAdmin) throw new Error("Unauthorized")
+        //delete
+        appDataSource.manager.remove(postToDelete)
+        if (fs.existsSync(postToDelete.imageUrl)) {
+            fs.unlinkSync(postToDelete.imageUrl);
+        }
+        res.json({ msg: "post deleted" })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "unauthorized" })
+    }
+}
+
+
+let fetchAllPosts = async (req: Request, res: Response) => {
+    try {
+        let postRepo = appDataSource.getRepository(Post)
+        let posts = await postRepo.find({ relations: { likes: true, comments: true, user: true } })
+        res.json({ posts })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not fetch posts" })
+    }
+}
+
+
+let likePost = async (req: Request, res: Response) => {
+    try {
+        let user: User = req.body.user
+        let post = await fetchPost(req.params.id)
+        if (!post) throw new Error("post not found!")
+        //checking if already liked, and dislike if so
+        let like = await fetchLike(user.id, post)
+        if (!like) {
+            //Like
+            saveLike(user, post)
+            res.json({ msg: "liked" })
+        } else {
+            //dislike
+            deleteLike(like.id)
+            res.json({ msg: "disliked" })
+        }
+    } catch (error) {
+        console.log(error)
+        res.json({msg: "something went wrong"})
+    }
+}
+
+
+let commentOnPost = async (req: Request, res: Response) => {
+    try {
+        let { user, text }: { user: User, text: string } = req.body
+        let post = await fetchPost(req.params.id)
+        if (!post) throw new Error("something went wrong")
+        saveComment(user, post!, text)
+        res.json({ msg: "comment added" })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "failed" })
+    }
+}
+
+let delete_Comment = async (req: Request, res: Response) => {
+    try {
+        let user: User = req.body.user
+        let post = await fetchPost(req.params.postId, { comments: true, user: true })
+        let comment = await fetchComment(req.params.commentId)
+        if (!post || !comment) throw new Error("something went wrong")
+        let commentInPost = post.comments.some((postComments) => postComments?.id == comment!.id)
+        if (!commentInPost) throw new Error("unauthorized")
+        if (user.isAdmin || user.id == comment.user.id || user.id == post.user.id) {
+            deleteComment(comment.id)
+            res.json({ msg: "deleted" })
+        }
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not delete comment" })
+    }
+}
+
+export {
+    addPost,
+    delete_Post,
+    fetchAllPosts,
+    likePost,
+    commentOnPost,
+    delete_Comment
+}

@@ -1,7 +1,9 @@
-import { AdminEditUser, createUser, deleteUser, fetchUser, fetchUserByusrn, saveToDB } from "../middleware/user.middleware";
-import { authMiddleware, createToken, deleteToken, generateToken, refreshMiddleware } from "../utilities/token";
+import {  createUser, fetchUser, fetchUserByusrn, saveToDB } from "../middleware/user.middleware";
+import {  createToken, deleteToken, generateToken } from "../utilities/token";
+import { generateHash } from "../utilities/hash";
 import appDataSource from "../ormconfig"
 import { Request, Response } from "express";
+import User from "../entities/user";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 
@@ -50,6 +52,7 @@ let loginUser = async (req: Request, res: Response) => {
 let logoutUser = async (req: Request, res: Response) => {
     try {
         let refreshToken = req.cookies.jwt
+        if (!refreshToken) throw new Error("something went wrong")
         let user = await fetchUser(req.body.user.id, { tokens: true })
         //updating user
         user?.tokens.filter((token) => token !== refreshToken)
@@ -77,9 +80,25 @@ let refreshAccessToken = (req: Request, res: Response) => {
     }
 }
 
+let userEditPassword = async (req: Request, res: Response) => {
+    let { oldPassword, newPassword, user }: { oldPassword: string, newPassword: string, user: User } = req.body
+    try {
+        if (await bcrypt.compare(oldPassword, user.password)) {
+            //setting a new password
+            user.password = await generateHash(newPassword)
+            appDataSource.manager.save(user)
+            res.json({ msg: "password updated successfuly" })
+        } else throw new Error("wrong old password")
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not update password" })
+    }
+}
+
 export {
     loginUser,
     logoutUser,
     refreshAccessToken,
-    register_user
+    register_user,
+    userEditPassword
 }
