@@ -4,6 +4,8 @@ import appDataSource from "../ormconfig"
 import fs from 'fs'
 import User from "../entities/user";
 import Post from "../entities/post";
+import Comment from "../entities/comment";
+import Like from "../entities/like";
 
 
 
@@ -107,11 +109,43 @@ let delete_Comment = async (req: Request, res: Response) => {
     }
 }
 
+let fetchAllComments = async (req: Request, res: Response) => {
+    try {
+        let commentRepo = appDataSource.getRepository(Comment)
+        let comments = await commentRepo
+        .createQueryBuilder('comment')
+        .leftJoinAndSelect('comment.user', 'user')
+        .where('comment.postId = :postId', { postId: req.params.id })
+        .getMany();        
+        res.json({ comments })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not fetch comments" })
+    }
+}
+
+let fetchAllLikes = async (req: Request, res: Response) => {
+    try {
+        let likesRepo = appDataSource.getRepository(Like)
+        let likes = await likesRepo
+        .createQueryBuilder('like')
+        .leftJoinAndSelect('like.user', 'user')
+        .where('like.postId = :postId', { postId: req.params.id })
+        .getMany(); 
+        res.json({ likes })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "could not fetch likes" })
+    }
+}
+
 export {
     addPost,
     delete_Post,
     fetchAllPosts,
     likePost,
     commentOnPost,
-    delete_Comment
+    delete_Comment,
+    fetchAllComments,
+    fetchAllLikes
 }

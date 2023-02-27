@@ -7,7 +7,8 @@ import { Request, Response } from "express";
 
 let adminAddUser = async (req: Request, res: Response) => {
     try {
-        let { user, username, password, email, isAdmin }: { user: User, username: string, password: string, email: string, isAdmin: boolean } = req.body
+        let { username, password, email, isAdmin }: { username: string, password: string, email: string, isAdmin: boolean } = req.body
+        let user = req.user!
         if (!user.isAdmin) throw new Error("Unauthorized")
         //add user
         let newUser = await createUser(username, password, email, isAdmin)
@@ -21,7 +22,7 @@ let adminAddUser = async (req: Request, res: Response) => {
 
 let adminDeleteUser = (req: Request, res: Response) => {
     try {
-        let { user }: { user: User, userToDeleteId: string } = req.body
+        let user = req.user!
         if (!user.isAdmin) throw new Error("Unauthorized")
         deleteUser(req.params.id)
         res.json({ msg: "user deleted successfuly" })
@@ -34,7 +35,8 @@ let adminDeleteUser = (req: Request, res: Response) => {
 
 let adminEditUser = async (req: Request, res: Response) => {
     try {
-        let { user, newUsername, newPassword, newEmail, isAdmin  }: { user: User, newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean } = req.body
+        let { newUsername, newPassword, newEmail, isAdmin  }: { newUsername: string, newPassword: string, newEmail: string, isAdmin: boolean } = req.body
+        let user = req.user!
         if (user.isAdmin) {
             //edit
             let userToEdit = await fetchUser(req.params.id)
