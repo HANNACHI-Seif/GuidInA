@@ -8,6 +8,9 @@ import Comment from "./entities/comment";
 import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
+import destRoutes from './routes/destRoutes'
+import Destination from "./entities/destination";
+import Dest_Image from "./entities/dest_image";
 declare global {
     namespace Express {
       interface Request {
@@ -76,6 +79,28 @@ require("dotenv").config();
         }
     })
 
+    app.get('/allDest', async(req: Request, res: Response) => {
+        try {
+            let destRepo = appDataSource.getRepository(Destination)
+            let destinations = await destRepo.find({ relations: { images: true } })
+            res.json({ destinations })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch destination" })
+        }
+    })
+
+    app.get('/allDestImages', async(req: Request, res: Response) => {
+        try {
+            let destImageRepo = appDataSource.getRepository(Dest_Image)
+            let destImages = await destImageRepo.find()
+            res.json({ destImages })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch destinations' images" })
+        }
+    })
+
 
     //routes
     //auth routes
@@ -86,6 +111,9 @@ require("dotenv").config();
 
     //admin routes
     app.use('/admin', adminRoutes)
+
+    //destination routes
+    app.use('/destination', destRoutes)
 
 
 

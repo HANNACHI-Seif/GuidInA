@@ -99,7 +99,7 @@ let delete_Comment = async (req: Request, res: Response) => {
         let comment = await fetchComment(req.params.commentId)
         if (!post || !comment) throw new Error("something went wrong")
         let commentInPost = post.comments.some((postComment) => postComment?.id == comment!.id)
-        if (!commentInPost || user.role !== roles.ADMIN || user.id !== comment.user.id || user.id !== post.user.id) throw new Error("unauthorized")
+        if (!commentInPost || (user.role !== roles.ADMIN && user.id !== comment.user.id && user.id !== post.user.id)) throw new Error("unauthorized")
         //delete
         deleteComment(comment.id)
         res.json({ msg: "deleted" })

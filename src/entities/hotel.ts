@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from "typeorm"
-import Image from "./image"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, OneToMany } from "typeorm"
+import Hotel_Image from "./hotel_image"
 
 @Entity()
 export default class Hotel {
@@ -15,9 +15,6 @@ export default class Hotel {
     @Column()
     description: string
 
-    @ManyToMany(() => Image)
-    @JoinTable()
-    images: Image[]
-
-
+    @OneToMany(() => Hotel_Image, hotel_image => hotel_image.hotel)
+    images: Hotel_Image
 }

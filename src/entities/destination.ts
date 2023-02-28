@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from "typeorm"
-import Image from "./image"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from "typeorm"
+import Dest_Image from "./dest_image"
 
 @Entity()
 export default class Destination {
@@ -15,8 +15,8 @@ export default class Destination {
     @Column()
     description: string
 
-    @ManyToMany(() => Image)
-    @JoinTable()
-    images: Image[]
+    @OneToMany(() => Dest_Image, dest_image => dest_image.destination, {cascade: true})
+    images: Dest_Image[]
+
 
 }

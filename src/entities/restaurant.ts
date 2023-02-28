@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable, ManyToMany } from "typeorm"
-import Image from "./image"
+import Restaurant_Image from "./restaurant_image"
 
 @Entity()
 export default class Restaurant {
@@ -15,8 +15,7 @@ export default class Restaurant {
     @Column()
     description: string
 
-    @ManyToMany(() => Image)
-    @JoinTable()
-    images: Image[]
+    @OneToMany(() => Restaurant_Image, restaurant_image => restaurant_image.restaurant)
+    images: Restaurant_Image
 
 }

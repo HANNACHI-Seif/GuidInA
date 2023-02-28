@@ -13,7 +13,7 @@ export default class Post {
     caption: string
 
     @Column()
-    imageUrl: string
+    imageUrl: string   
 
     @ManyToOne(() => User, user => user.posts, { onDelete: "CASCADE" })
     user: User
