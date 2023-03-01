@@ -9,8 +9,10 @@ import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
 import destRoutes from './routes/destRoutes'
+import hotelRoutes from './routes/hotelRoutes'
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
+import Hotel from "./entities/hotel";
 declare global {
     namespace Express {
       interface Request {
@@ -101,6 +103,16 @@ require("dotenv").config();
         }
     })
 
+    app.get('/allHotels', async (req: Request, res: Response) => {
+        try {
+            let hotelRepo = appDataSource.getRepository(Hotel)
+            let hotels = await hotelRepo.find({ relations: { images: true } })
+            res.json({ hotels })
+        } catch (error) {
+            res.json({ msg: "could not fetch hotels" })
+        }
+    })
+
 
     //routes
     //auth routes
@@ -114,6 +126,9 @@ require("dotenv").config();
 
     //destination routes
     app.use('/destination', destRoutes)
+
+    //hotel routes
+    app.use('/hotel', hotelRoutes)
 
 
 

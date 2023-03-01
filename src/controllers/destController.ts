@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
-import roles from "../constants/roles";
 import { addDestImageMiddleware, addDestMiddleware, deleteDestImageMiddleware, editDestmiddleware, fetchDest, fetchDestImage } from "../middleware/dest.middleware";
 import appDataSource from '../ormconfig'
 
 
 let addDestination = (req: Request, res: Response) => {
     try {
-        let user = req.user!
-        if (user.role !== roles.ADMIN) throw new Error("unauthorized")
         let { name, description, city }: { name: string, description: string, city: string } = req.body
         addDestMiddleware(city, name, description)
         res.json({ msg: "destination added" })

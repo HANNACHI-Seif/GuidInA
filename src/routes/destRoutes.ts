@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express'
+import express from 'express'
 import { addDestImage, addDestination, deleteDest, deleteDestImage, editDest } from '../controllers/destController'
 import { authMiddleware } from '../utilities/token'
 import upload from '../utilities/img'
@@ -9,7 +9,7 @@ let router = express.Router()
 
 
 
-router.post('/addDest', authMiddleware, addDestination)
+router.post('/addDest', authMiddleware, adminCheck, addDestination)
 
 router.post('/:id/addImage', authMiddleware, adminCheck, upload.single("image"), addDestImage)
 

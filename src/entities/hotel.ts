@@ -16,5 +16,5 @@ export default class Hotel {
     description: string
 
     @OneToMany(() => Hotel_Image, hotel_image => hotel_image.hotel)
-    images: Hotel_Image
+    images: Hotel_Image[]
 }
