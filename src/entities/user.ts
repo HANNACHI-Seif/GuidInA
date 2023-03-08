@@ -14,6 +14,7 @@ export default class User {
     @Column()
     @IsNotEmpty({ message: "username is required"})
     @Length(4, 20, { message: "username must be at least $constraint1 and not longer than constraint2 characters" })
+    @Unique(['username'])
     username: string
 
     @Column()

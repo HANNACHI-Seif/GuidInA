@@ -15,6 +15,9 @@ export default class Destination {
     @Column()
     description: string
 
+    @Column()
+    type: string
+
     @OneToMany(() => Dest_Image, dest_image => dest_image.destination, {cascade: true})
     images: Dest_Image[]
 

@@ -76,14 +76,15 @@ let generateToken = async (data: usr, key: string, ExpDate: string) =>  {
 
 let createToken = (token: string, user: User) => {
     let newToken = new RefreshToken()
+    let tokenRepo = appDataSource.getRepository(RefreshToken)
     newToken.token = token
     newToken.user = user
-    return newToken 
+    tokenRepo.save(newToken)
 }
 
 let deleteToken = async(token: string) => {
     let tokenRepo = appDataSource.getRepository(RefreshToken)
-    await tokenRepo.delete({ token: token })
+    tokenRepo.delete({ token: token })
 }
 
 let fetchToken = (token: string) => {

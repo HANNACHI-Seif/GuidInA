@@ -19,9 +19,8 @@ let register_user = async (req: Request, res: Response) => {
         //creating access&refresh token
         let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
         let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-        let newToken = createToken(refresh, newUser)
-        //saving to database & response 
-        await saveToDB(newUser, newToken)
+        await createToken(refresh, newUser)
+        //response 
         res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
         //res.json({ accessToken, refresh })
     } catch (error) {
@@ -32,19 +31,21 @@ let register_user = async (req: Request, res: Response) => {
 }
 
 let loginUser = async (req: Request, res: Response) => {
-    let { username, password } = req.body
-    let userByUsername = await fetchUserByusrn(username)
-    if (!userByUsername) res.json({ msg: "uncorrect username or plogassword" })
-    if (await bcrypt.compare(password, userByUsername!.password)) {
-        //creating access&refresh token
-        let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
-        let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-        let newToken = createToken(refresh, userByUsername!)
-        //savivng to db & response
-        await saveToDB(userByUsername!, newToken)
-        res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-    } else {
-        res.json({ msg: "uncorrect username or password" })
+    try {
+        let { username, password } = req.body
+        let userByUsername = await fetchUserByusrn(username)
+        if (!userByUsername) throw new Error("uncorrect username or password!")
+        if (await bcrypt.compare(password, userByUsername!.password)) {
+            //creating access&refresh token
+            let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
+            let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            await createToken(refresh, userByUsername!)
+            //response
+            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
+        } else throw new Error("uncorrect username or password!")
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: error })
     }
 }
 
@@ -53,11 +54,9 @@ let logoutUser = async (req: Request, res: Response) => {
         let refreshToken = req.cookies.jwt
         if (!refreshToken) throw new Error("something went wrong")
         let user = await fetchUser(req.user!.id, { tokens: true })
-        //updating user
-        user?.tokens.filter((token) => token !== refreshToken)
-        appDataSource.manager.save(user)
+        if ((user?.tokens.some((token) => token == refreshToken))) throw new Error("something went wrong") 
         //deleting token from db
-        await deleteToken(refreshToken)
+        deleteToken(refreshToken)
         res.clearCookie('jwt').json({ msg: "logged out successfuly" })
     } catch (error) {
         console.log(error)
