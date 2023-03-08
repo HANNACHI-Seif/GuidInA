@@ -4,7 +4,6 @@ import User from "../entities/user";
 import RefreshToken from "../entities/refreshToken";
 import { Request, Response, NextFunction } from "express";
 import { fetchUser } from "../middleware/user.middleware";
-import fs from 'fs'
 require("dotenv").config();
 
 

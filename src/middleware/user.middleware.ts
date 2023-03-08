@@ -1,4 +1,3 @@
-import RefreshToken from "../entities/refreshToken"
 import User from "../entities/user"
 import { generateHash } from "../utilities/hash"
 import appDataSource from "../ormconfig"
@@ -17,15 +16,7 @@ let createUser = async (username: string, password: string, email: string, role:
     return await userRepo.save(newUser);
 }
 
-let saveToDB = async(user: User, token: RefreshToken) => {
-    let tokenRepo = appDataSource.getRepository(RefreshToken)
-    try {
-        token.user = user
-        await tokenRepo.save(token)
-    } catch (error) {
-        console.log(error)
-    }
-}
+
 
 let fetchUser = (id: string, obj = {}) => {
     let userRepo = appDataSource.getRepository(User)
@@ -65,8 +56,7 @@ let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: s
 }
 
 export {
-    createUser,
-    saveToDB, 
+    createUser, 
     fetchUser,
     fetchUserByusrn,
     deleteUser,

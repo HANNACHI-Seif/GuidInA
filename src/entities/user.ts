@@ -4,6 +4,7 @@ import Post from './post'
 import Like from "./like"
 import RefreshToken from "./refreshToken"
 import Comment from "./comment"
+import User_review from "./user_review"
 
 
 @Entity()
@@ -13,7 +14,7 @@ export default class User {
 
     @Column()
     @IsNotEmpty({ message: "username is required"})
-    @Length(4, 20, { message: "username must be at least $constraint1 and not longer than constraint2 characters" })
+    @Length(4, 20, { message: "username must be at least $constraint1 and not longer than $constraint2 characters" })
     @Unique(['username'])
     username: string
 
@@ -46,6 +47,12 @@ export default class User {
     @OneToMany(() => RefreshToken, token => token.user, { cascade: true })
     @JoinColumn()
     tokens: RefreshToken[]
+
+    @OneToMany(() => User_review, review => review.ratedUser)
+    myReviews: User_review[]
+
+    @OneToMany(() => User_review, review => review.user)
+    reviews: User_review[]
 
     
 }

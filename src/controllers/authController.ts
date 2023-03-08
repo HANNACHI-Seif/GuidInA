@@ -1,4 +1,4 @@
-import {  createUser, fetchUser, fetchUserByusrn, saveToDB } from "../middleware/user.middleware";
+import {  createUser, fetchUser, fetchUserByusrn } from "../middleware/user.middleware";
 import {  createToken, deleteToken, generateToken } from "../utilities/token";
 import { generateHash } from "../utilities/hash";
 import appDataSource from "../ormconfig"

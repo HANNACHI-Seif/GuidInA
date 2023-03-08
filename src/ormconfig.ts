@@ -6,6 +6,7 @@ import Comment from './entities/comment'
 import RefreshToken from './entities/refreshToken'
 import Destination from './entities/destination'
 import Dest_Image from './entities/dest_image'
+import User_review from './entities/user_review'
 
 export default new DataSource({
     type: "mysql",
@@ -16,7 +17,7 @@ export default new DataSource({
     database: "auth_db",
     synchronize: true,
     logging: false,
-    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image],
+    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review],
     subscribers: [],
     migrations: [], 
 })
