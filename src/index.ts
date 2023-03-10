@@ -9,8 +9,11 @@ import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
 import destRoutes from './routes/destRoutes'
+import reviewRoutes from './routes/reviewRoutes'
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
+import Decimal from "decimal.js";
+import User_review from "./entities/user_review";
 declare global {
     namespace Express {
       interface Request {
@@ -38,7 +41,13 @@ require("dotenv").config();
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { likes: true, comments: true, tokens: true, posts: true} })
+            let users = await userRepo.find({ relations: { 
+                likes: true, 
+                comments: true, 
+                tokens: true, 
+                posts: true, 
+                myReviews: true,
+            } })
             res.json({users})
         } catch (err) {
             console.log(err);
@@ -101,6 +110,20 @@ require("dotenv").config();
         }
     })
 
+    app.get('/avg/:id', async (req: Request, res: Response) => {
+        let avg = await appDataSource.getRepository(User_review).createQueryBuilder('user_review').select('AVG(user_review.stars)', 'average').where('user_review.ratedUserId = :ratedUserId', { ratedUserId: req.params.id }).getRawOne();
+        res.json({
+            avg: avg,
+            avgg: avg.average
+        })
+    })
+
+    app.get('/allReviews', (req: Request, res: Response) => {
+        let userReviewRepo = appDataSource.getRepository(User_review)
+        let reviews = userReviewRepo.find({ relations: {user: true, ratedUser: true} })
+        res.json({  })
+    })
+
 
 
 
@@ -118,7 +141,8 @@ require("dotenv").config();
     //destination routes
     app.use('/destination', destRoutes)
 
-    //hotel routes
+    //review routes
+    app.use('/reviews', reviewRoutes)
 
 
 

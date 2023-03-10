@@ -58,17 +58,17 @@ let fetchAllPosts = async (req: Request, res: Response) => {
 let likePost = async (req: Request, res: Response) => {
     try {
         let user: User = req.user!
-        let post = await fetchPost(req.params.id)
+        let post = await fetchPost(req.params.id, {likes: true})
         if (!post) throw new Error("post not found!")
         //checking if already liked, and dislike if so
-        let like = await fetchLike(user.id, post)
+        let like = await fetchLike(user, post)
         if (!like) {
             //Like
-            saveLike(user, post)
+            await saveLike(user, post)
             res.json({ msg: "liked" })
         } else {
             //dislike
-            deleteLike(like.id)
+            await deleteLike(like.id)
             res.json({ msg: "disliked" })
         }
     } catch (error) {
@@ -84,7 +84,7 @@ let commentOnPost = async (req: Request, res: Response) => {
         let user = req.user!
         let post = await fetchPost(req.params.id)
         if (!post) throw new Error("something went wrong")
-        saveComment(user, post!, text)
+        await saveComment(user, post!, text)
         res.json({ msg: "comment added" })
     } catch (error) {
         console.log(error)
@@ -101,7 +101,7 @@ let delete_Comment = async (req: Request, res: Response) => {
         let commentInPost = post.comments.some((postComment) => postComment?.id == comment!.id)
         if (!commentInPost || (user.role !== roles.ADMIN && user.id !== comment.user.id && user.id !== post.user.id)) throw new Error("unauthorized")
         //delete
-        deleteComment(comment.id)
+        await deleteComment(comment.id)
         res.json({ msg: "deleted" })
     } catch (error) {
         console.log(error)

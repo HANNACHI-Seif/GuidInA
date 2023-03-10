@@ -26,10 +26,8 @@ let deletePost = (id: string) => {
     postRepo.delete({ id: id })
 }
 
-let fetchLike = async (userId: string, post: Post) => {
-    let likeRepo = appDataSource.getRepository(Like)
-    let userlike = await fetchUser(userId)
-    return likeRepo.findOne({ relations: { user: true, post: true }, where: { user: userlike!, post: post } })
+let fetchLike = async (user: User, post: Post) => {
+    return post.likes.find((like) => like.user == user)   
 }
 
 let deleteLike = async (id: string) => {

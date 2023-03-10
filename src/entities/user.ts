@@ -5,6 +5,8 @@ import Like from "./like"
 import RefreshToken from "./refreshToken"
 import Comment from "./comment"
 import User_review from "./user_review"
+import  DecimalTransformer  from "../utilities/float._."
+import Decimal from "decimal.js"
 
 
 @Entity()
@@ -32,6 +34,9 @@ export default class User {
     @Column()
     role: string
 
+    @Column( "decimal", {precision: 6, scale: 1, transformer: new DecimalTransformer(), default: 0.0})
+    rating: Decimal
+
     @OneToMany( () => Post, post => post.user, { cascade: true })
     @JoinColumn()
     posts: Post[]
@@ -51,8 +56,6 @@ export default class User {
     @OneToMany(() => User_review, review => review.ratedUser)
     myReviews: User_review[]
 
-    @OneToMany(() => User_review, review => review.user)
-    reviews: User_review[]
 
     
 }

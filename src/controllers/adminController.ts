@@ -12,7 +12,7 @@ let adminAddUser = async (req: Request, res: Response) => {
         if (user.role !== roles.ADMIN) throw new Error("Unauthorized")
         //add user
         let newUser = await createUser(username, password, email, role)
-        appDataSource.manager.save(newUser)
+        await appDataSource.manager.save(newUser)
         res.json({ msg: "user created" })
     } catch (error) {
         console.log(error)
@@ -20,11 +20,11 @@ let adminAddUser = async (req: Request, res: Response) => {
     }
 }
 
-let adminDeleteUser = (req: Request, res: Response) => {
+let adminDeleteUser = async (req: Request, res: Response) => {
     try {
         let user = req.user!
         if (user.role !== roles.ADMIN) throw new Error("Unauthorized")
-        deleteUser(req.params.id)
+        await deleteUser(req.params.id)
         res.json({ msg: "user deleted successfuly" })
     } catch (error) {
         console.log(error)
@@ -41,7 +41,7 @@ let adminEditUser = async (req: Request, res: Response) => {
         //edit
         let userToEdit = await fetchUser(req.params.id)
         if (!userToEdit) throw new Error("user not found")
-        AdminEditUser(userToEdit, newUsername, newPassword, newEmail, newRole)
+        await AdminEditUser(userToEdit, newUsername, newPassword, newEmail, newRole)
         res.json({ msg: "user edited successfully" })
     } catch (error) {
         console.log(error)

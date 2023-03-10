@@ -4,6 +4,7 @@ import appDataSource from "../ormconfig"
 import Post from "../entities/post"
 import fs from 'fs'
 import  roles  from "../constants/roles"
+import Decimal from "decimal.js"
 
 
 let createUser = async (username: string, password: string, email: string, role: string = roles.TOURIST) => {
@@ -11,6 +12,7 @@ let createUser = async (username: string, password: string, email: string, role:
     newUser.username = username
     newUser.email = email
     newUser.role = role
+    newUser.rating = new Decimal(0.0);
     newUser.password = (await generateHash(password))!
     let userRepo = appDataSource.getRepository(User)
     return await userRepo.save(newUser);

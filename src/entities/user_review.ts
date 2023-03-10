@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn, ManyToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm"
 import User from "./user"
+import { Max, Min, IsInt } from "class-validator"
 
 @Entity()
 export default class User_review {
@@ -16,7 +17,7 @@ export default class User_review {
     @ManyToOne(() => User, user => user.myReviews)
     ratedUser: User
 
-    @ManyToOne(() => User, user => user.reviews)
+    @ManyToOne(() => User)
     user: User
 
 

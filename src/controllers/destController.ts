@@ -3,10 +3,10 @@ import { addDestImageMiddleware, addDestMiddleware, deleteDestImageMiddleware, e
 import appDataSource from '../ormconfig'
 
 
-let addDestination = (req: Request, res: Response) => {
+let addDestination = async (req: Request, res: Response) => {
     try {
         let { name, description, city, type }: { name: string, description: string, city: string, type: string } = req.body
-        addDestMiddleware(city, name, description, type)
+        await addDestMiddleware(city, name, description, type)
         res.json({ msg: "destination added" })
     } catch (error) {
         console.log(error)
@@ -18,7 +18,7 @@ let addDestImage = async (req: Request, res: Response) => {
     try {
         let dest = await fetchDest(req.params.id)
         if ( !dest ) throw new Error("something went wrong")
-        addDestImageMiddleware(req.file?.path!, dest)
+        await addDestImageMiddleware(req.file?.path!, dest)
         res.json({ msg: "image added" })
     } catch (error) {
         console.log(error)
@@ -32,7 +32,7 @@ let deleteDestImage = async (req: Request, res: Response) => {
         let image = await fetchDestImage(req.params.imageId)
         if ( !dest || !image || !(dest.images.some((destImage) => destImage.id == image?.id))) throw new Error("something went wrong")
         //deleting
-        deleteDestImageMiddleware(image)
+        await deleteDestImageMiddleware(image)
         res.json({ msg: "image deleted" })
     } catch (error) {
         console.log(error)
@@ -44,8 +44,8 @@ let deleteDest = async (req: Request, res: Response) => {
     try {
         let destToDelete = await fetchDest(req.params.id, { images: true })
         if (!destToDelete) throw new Error("something went wrong")
-        destToDelete.images.forEach((image) => deleteDestImageMiddleware(image))
-        appDataSource.manager.remove(destToDelete)
+        await destToDelete.images.forEach(async (image) => await deleteDestImageMiddleware(image))
+        await appDataSource.manager.remove(destToDelete)
         res.json({ msg: "dest deleted successfuly" })
     } catch (error) {
         console.log(error)
@@ -58,7 +58,7 @@ let editDest = async (req: Request, res: Response) => {
         let destToEdit = await fetchDest(req.params.id)
         if ( !destToEdit ) throw new Error("something went wrong")
         let { newname, newcity, newDescription, newType }: { newname: string, newcity: string, newDescription: string, newType: string } = req.body
-        editDestmiddleware(destToEdit, newname, newcity, newDescription, newType)
+        await editDestmiddleware(destToEdit, newname, newcity, newDescription, newType)
         res.json({ msg: "destination edited" })
     } catch (error) {
         console.log(error)

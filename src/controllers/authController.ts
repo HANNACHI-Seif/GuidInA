@@ -56,7 +56,7 @@ let logoutUser = async (req: Request, res: Response) => {
         let user = await fetchUser(req.user!.id, { tokens: true })
         if ((user?.tokens.some((token) => token == refreshToken))) throw new Error("something went wrong") 
         //deleting token from db
-        deleteToken(refreshToken)
+        await deleteToken(refreshToken)
         res.clearCookie('jwt').json({ msg: "logged out successfuly" })
     } catch (error) {
         console.log(error)
@@ -85,7 +85,7 @@ let userEditPassword = async (req: Request, res: Response) => {
         if (await bcrypt.compare(oldPassword, user.password)) {
             //setting a new password
             user.password = await generateHash(newPassword)
-            appDataSource.manager.save(user)
+            await appDataSource.manager.save(user)
             res.json({ msg: "password updated successfuly" })
         } else throw new Error("wrong old password")
     } catch (error) {
