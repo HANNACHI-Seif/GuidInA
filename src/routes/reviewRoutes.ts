@@ -1,16 +1,17 @@
 import express from 'express'
-import { addReview, deleteReview, fetchUserRevivews } from '../controllers/reviewController'
+import { addUserReview, deleteUserReview, editUserReview, fetchUserRevivews } from '../controllers/reviewController'
 import { authMiddleware } from '../utilities/token'
-import { adminCheck } from '../middleware/admin.middleware'
 
 
 let router = express.Router()
 
 
-router.post('/:id/add', authMiddleware, addReview)
+router.post('/:id/add', authMiddleware, addUserReview)
 
 router.get('/:id/all', authMiddleware, fetchUserRevivews)
 
-router.delete('/:id/delete', authMiddleware, deleteReview)
+router.delete('/:id/delete', authMiddleware, deleteUserReview)
+
+router.patch('/:id/edit', authMiddleware, editUserReview)
 
 export default router

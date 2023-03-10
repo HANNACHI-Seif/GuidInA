@@ -5,7 +5,7 @@ import { fetchUser } from "./user.middleware"
 import { Decimal } from "decimal.js"
 
 
-let addReviewMiddleware = async (text: string, stars: number, ratedUser: User, user: User) => {
+let addUserReviewMiddleware = async (text: string, stars: number, ratedUser: User, user: User) => {
     let userReviewRepo = appDataSource.getRepository(User_review)
     let newReview = new User_review()
     newReview.text = text
@@ -33,8 +33,15 @@ let updateUserReviews = async (id: string) => {
     
 }
 
+let editUserReviewMiddleware = async (newText: string, newStars: number, userReviewToEdit: User_review) => {
+    if (newText) userReviewToEdit.text = newText
+    if (newStars) userReviewToEdit.stars = newStars
+    await appDataSource.manager.save(userReviewToEdit)
+}
+
 export {
-    addReviewMiddleware,
+    addUserReviewMiddleware,
     fetchReview,
-    updateUserReviews
+    updateUserReviews,
+    editUserReviewMiddleware
 }

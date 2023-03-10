@@ -1,7 +1,7 @@
 {
   "name": "auth-node",
   "version": "1.0.0",
-  "description": "authentication using node express ts typeorm mysql",
+  "description": "guidina",
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "auth-node"
+    "url": "https://github.com/HANNACHI-Seif/auth-node.git"
   },
   "author": "seif hann",
   "license": "ISC",

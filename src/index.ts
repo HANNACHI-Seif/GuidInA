@@ -110,18 +110,10 @@ require("dotenv").config();
         }
     })
 
-    app.get('/avg/:id', async (req: Request, res: Response) => {
-        let avg = await appDataSource.getRepository(User_review).createQueryBuilder('user_review').select('AVG(user_review.stars)', 'average').where('user_review.ratedUserId = :ratedUserId', { ratedUserId: req.params.id }).getRawOne();
-        res.json({
-            avg: avg,
-            avgg: avg.average
-        })
-    })
-
-    app.get('/allReviews', (req: Request, res: Response) => {
+    app.get('/allReviews', async (req: Request, res: Response) => {
         let userReviewRepo = appDataSource.getRepository(User_review)
-        let reviews = userReviewRepo.find({ relations: {user: true, ratedUser: true} })
-        res.json({  })
+        let reviews = await userReviewRepo.find({ relations: {user: true, ratedUser: true} })
+        res.json({ reviews })
     })
 
 
