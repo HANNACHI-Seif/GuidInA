@@ -7,6 +7,10 @@ import RefreshToken from './entities/refreshToken'
 import Destination from './entities/destination'
 import Dest_Image from './entities/dest_image'
 import User_review from './entities/user_review'
+import Restaurant from './entities/restaurant'
+import Restaurant_Image from './entities/restaurant_image'
+import Hotel from './entities/hotel'
+import Hotel_Image from './entities/hotel_image'
 
 export default new DataSource({
     type: "mysql",
@@ -17,7 +21,7 @@ export default new DataSource({
     database: "auth_db",
     synchronize: true,
     logging: false,
-    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review],
+    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review, Restaurant, Restaurant_Image, Hotel, Hotel_Image],
     subscribers: [],
     migrations: [], 
 })

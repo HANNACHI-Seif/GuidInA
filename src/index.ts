@@ -9,11 +9,14 @@ import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
 import destRoutes from './routes/destRoutes'
-import reviewRoutes from './routes/reviewRoutes'
+import userReviewRoutes from './routes/userReviewRoutes';
+import hotelRoutes from './routes/hotelRoutes';
+import restaurantRoutes from './routes/restaurantRoutes'
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
-import Decimal from "decimal.js";
 import User_review from "./entities/user_review";
+import Restaurant from "./entities/restaurant";
+import Hotel from "./entities/hotel";
 declare global {
     namespace Express {
       interface Request {
@@ -116,6 +119,28 @@ require("dotenv").config();
         res.json({ reviews })
     })
 
+    app.get('/allRestaurants', async (req: Request, res: Response) => {
+        try {
+            let restRepo = appDataSource.getRepository(Restaurant)
+            let restaurants = await restRepo.find({relations: { images: true }});
+            res.json({restaurants})
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch restaurants" })
+        }
+    })
+
+    app.get('/allHotels', async (req: Request, res: Response) => {
+        try {
+            let hotelRepo = appDataSource.getRepository(Hotel)
+            let hotels = await hotelRepo.find({ relations: { images: true } })
+            res.json({ hotels })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch hotels" })
+        }
+    })
+
 
 
 
@@ -130,11 +155,23 @@ require("dotenv").config();
     //user
     app.use('/admin', adminRoutes)
 
+    //user review routes
+    app.use('/reviews', userReviewRoutes)
+
     //destination routes
     app.use('/destination', destRoutes)
 
-    //review routes
-    app.use('/reviews', reviewRoutes)
+    //hotel routes
+    app.use('/hotel', hotelRoutes)
+
+    //restaurant routes
+    app.use('/restaurant', restaurantRoutes)
+
+    //TODO: reset password (OTP)
+    //TODO: error handling of image upload high periority
+    //TODO: reviews for destinations/restaurants/hotels
+    //TODO: error handling of everything else
+    
 
 
 

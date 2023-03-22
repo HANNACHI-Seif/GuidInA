@@ -3,12 +3,11 @@ import Destination from '../entities/destination'
 import appDataSource from '../ormconfig'
 import fs from 'fs'
 
-let addDestMiddleware = (city: string, name: string, description: string, type: string) => {
+let addDestMiddleware = (city: string, name: string, description: string) => {
     let newDestination = new Destination()
     newDestination.city = city
     newDestination.name = name 
     newDestination.description = description
-    newDestination.type = type
     appDataSource.manager.save(newDestination)
 }
 
@@ -35,11 +34,10 @@ let deleteDestImageMiddleware = (image: Dest_Image) => {
     if ( fs.existsSync(image.url) ) fs.unlinkSync(image.url)
 }
 
-let editDestmiddleware = (destToEdit: Destination, newname: string, newcity: string, newDescription: string, newType: string) => {
+let editDestmiddleware = (destToEdit: Destination, newname: string, newcity: string, newDescription: string) => {
     if (newname) destToEdit.name = newname
     if (newcity) destToEdit.city = newcity
     if (newDescription) destToEdit.description = newDescription
-    if (newType) destToEdit.type = newType
     appDataSource.manager.save(destToEdit)
 }
 

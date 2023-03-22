@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from "typeorm"
-import Dest_Image from "./dest_image"
+import Restaurant_Image from "./restaurant_image"
 
 @Entity()
-export default class Destination {
+export default class Restaurant {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
@@ -15,9 +15,11 @@ export default class Destination {
     @Column()
     description: string
 
+    @Column()
+    type: string
 
-    @OneToMany(() => Dest_Image, dest_image => dest_image.destination, {cascade: true})
-    images: Dest_Image[]
+    @OneToMany(() => Restaurant_Image , rest_image => rest_image.restaurant, {cascade: true})
+    images: Restaurant_Image[]
 
 
 }

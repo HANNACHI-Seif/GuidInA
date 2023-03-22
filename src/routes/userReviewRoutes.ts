@@ -1,5 +1,5 @@
 import express from 'express'
-import { addUserReview, deleteUserReview, editUserReview, fetchUserRevivews } from '../controllers/reviewController'
+import { addUserReview, deleteUserReview, editUserReview, fetchUserRevivews } from '../controllers/userReviewController'
 import { authMiddleware } from '../utilities/token'
 
 
