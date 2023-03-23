@@ -167,7 +167,6 @@ require("dotenv").config();
     //restaurant routes
     app.use('/restaurant', restaurantRoutes)
 
-    //TODO: reset password (OTP)
     //TODO: error handling of image upload high periority
     //TODO: reviews for destinations/restaurants/hotels
     //TODO: error handling of everything else
