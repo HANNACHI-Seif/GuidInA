@@ -6,7 +6,7 @@ export default class Hotel_Image {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column()
+    @Column({ default: "" })
     url: string
 
     @ManyToOne(() => Hotel, {onDelete: "CASCADE"})

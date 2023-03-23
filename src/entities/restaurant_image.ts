@@ -6,7 +6,7 @@ export default class Restaurant_Image {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column()
+    @Column({ default: "" })
     url: string
 
     @ManyToOne(() => Restaurant, {onDelete: "CASCADE"})

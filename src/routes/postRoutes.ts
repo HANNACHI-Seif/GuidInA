@@ -1,12 +1,12 @@
 import express from 'express'
 import { authMiddleware } from '../utilities/token'
-import upload from "../utilities/img";
+import handleFileUpload from "../utilities/img";
 import { addPost, commentOnPost, delete_Comment, delete_Post, fetchAllComments, fetchAllLikes, fetchAllPosts, likePost } from '../controllers/postController';
 
 
 let router = express.Router()
 
-router.post('/share', authMiddleware, upload.single("image"),  addPost)
+router.post('/share', authMiddleware, handleFileUpload,  addPost)
 
 router.delete('/delete/:id', authMiddleware, delete_Post)
 

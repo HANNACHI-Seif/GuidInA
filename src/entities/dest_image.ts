@@ -6,7 +6,7 @@ export default class Dest_Image {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column()
+    @Column({ default: "" })
     url: string
 
     @ManyToOne(() => Destination, {onDelete: "CASCADE"})
