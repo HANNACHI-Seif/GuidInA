@@ -1,13 +1,11 @@
-import {  createUser, fetchUser, fetchUserByusrn } from "../middleware/user.middleware";
-import {  createToken, deleteToken, generateToken } from "../utilities/token";
+import {  createUser, fetchUser, fetchUserByEmail, fetchUserByusrn } from "../middleware/user.middleware";
+import {  authToken, createToken, deleteToken, generateToken } from "../utilities/token";
 import { generateHash } from "../utilities/hash";
 import appDataSource from "../ormconfig"
 import { Request, Response } from "express";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
-
-
-
+import sendResetPasswordEmail from "../utilities/resetEmail";
 
 
 
@@ -94,10 +92,61 @@ let userEditPassword = async (req: Request, res: Response) => {
     }
 }
 
+let forgotPassword = async (req: Request, res: Response) => {
+    try {
+        let { email }: { email: string } = req.body
+        if (!email) throw new Error("something went wrong")
+        let user = await fetchUserByEmail(email)
+        if (!user) throw new Error("there is no user with this email")
+        let token = await generateToken({ id: user.id }, process.env.RESET_TOKEN_SECRET!, '5m')
+        user.resetToken = token
+        appDataSource.manager.save(user)
+        let link = `${process.env.BASE_URL}/user/password-reset/${user.id}/${token}`
+        await sendResetPasswordEmail(email, user.username, link)
+        res.json({ msg: "check your email inbox!" })
+    } catch (error) {
+        console.log(error);
+        res.json({ msg: error.message })
+    }
+}
+
+let resetPasswordGet = async (req: Request, res: Response) => {
+    try {
+        let token = req.params.token
+        let user = await authToken(token, process.env.RESET_TOKEN_SECRET!)
+        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error("invalid link or expired")
+        res.json({ msg: "all good" })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: error.message })
+    }
+}
+
+let resetPasswordPost = async (req: Request, res: Response) => {
+    try {
+        let { password }: { password: string } = req.body
+        let token = req.params.token
+        let user = await authToken(token, process.env.RESET_TOKEN_SECRET!)
+        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error("invalid link or expired")
+        user.password = await generateHash(password)
+        user.resetToken = '';
+        appDataSource.manager.save(user)
+        res.json({msg: "password reset successfuly"})
+    } catch (error) {
+        console.log(error)
+        res.json(error.message)
+    }
+}
+
+
+
 export {
     loginUser,
     logoutUser,
     refreshAccessToken,
     register_user,
-    userEditPassword
+    userEditPassword,
+    forgotPassword,
+    resetPasswordPost,
+    resetPasswordGet
 }

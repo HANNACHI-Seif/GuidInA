@@ -37,6 +37,9 @@ export default class User {
     @Column( "decimal", {precision: 6, scale: 1, transformer: new DecimalTransformer(), default: 0.0})
     rating: Decimal
 
+    @Column({ default: '' })
+    resetToken: string
+
     @OneToMany( () => Post, post => post.user, { cascade: true })
     @JoinColumn()
     posts: Post[]

@@ -30,7 +30,10 @@ let fetchUserByusrn = (username: string) => {
     return userRepo.findOne({ where: { username: username }, relations: { tokens: true } })
 }
 
-
+let fetchUserByEmail = (email: string) => {
+    let userRepo = appDataSource.getRepository(User)
+    return userRepo.findOne({ where: { email: email } })
+}
 
 let deleteUser = async (id: string) => {
     try {
@@ -61,6 +64,7 @@ export {
     createUser, 
     fetchUser,
     fetchUserByusrn,
+    fetchUserByEmail,
     deleteUser,
     AdminEditUser
 }
