@@ -11,6 +11,7 @@ import Restaurant from './entities/restaurant'
 import Restaurant_Image from './entities/restaurant_image'
 import Hotel from './entities/hotel'
 import Hotel_Image from './entities/hotel_image'
+import Dest_Review from './entities/dest_review'
 
 export default new DataSource({
     type: "mysql",
@@ -21,7 +22,7 @@ export default new DataSource({
     database: "auth_db",
     synchronize: true,
     logging: false,
-    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review, Restaurant, Restaurant_Image, Hotel, Hotel_Image],
+    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review, Restaurant, Restaurant_Image, Hotel, Hotel_Image, Dest_Review],
     subscribers: [],
     migrations: [], 
 })

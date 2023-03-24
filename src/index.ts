@@ -12,6 +12,7 @@ import destRoutes from './routes/destRoutes'
 import userReviewRoutes from './routes/userReviewRoutes';
 import hotelRoutes from './routes/hotelRoutes';
 import restaurantRoutes from './routes/restaurantRoutes'
+import destReviewRoutes from './routes/destReviewRoutes'
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
 import User_review from "./entities/user_review";
@@ -94,7 +95,7 @@ require("dotenv").config();
     app.get('/allDest', async(req: Request, res: Response) => {
         try {
             let destRepo = appDataSource.getRepository(Destination)
-            let destinations = await destRepo.find({ relations: { images: true } })
+            let destinations = await destRepo.find({ relations: { images: true, reviews: true } })
             res.json({ destinations })
         } catch (error) {
             console.log(error)
@@ -156,10 +157,13 @@ require("dotenv").config();
     app.use('/admin', adminRoutes)
 
     //user review routes
-    app.use('/reviews', userReviewRoutes)
+    app.use('/user-reviews', userReviewRoutes)
 
     //destination routes
     app.use('/destination', destRoutes)
+
+    //destination reviews
+    app.use('/destination-reviews', destReviewRoutes)
 
     //hotel routes
     app.use('/hotel', hotelRoutes)
@@ -167,7 +171,11 @@ require("dotenv").config();
     //restaurant routes
     app.use('/restaurant', restaurantRoutes)
 
+
+    //FINISH REVVIEWS
     //TODO: reviews for destinations/restaurants/hotels
+    //TODO: car posts / house posts
+    //TODO: role application form
     //TODO: error handling of everything else
     
 

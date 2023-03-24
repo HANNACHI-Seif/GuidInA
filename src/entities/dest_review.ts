@@ -1,8 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm"
 import User from "./user"
+import Destination from "./destination"
 
 @Entity()
-export default class User_review {
+export default class Dest_Review {
 
     @PrimaryGeneratedColumn("uuid")
     id: string
@@ -13,8 +14,8 @@ export default class User_review {
     @Column()
     stars: number
 
-    @ManyToOne(() => User, user => user.myReviews)
-    ratedUser: User
+    @ManyToOne(() => Destination, destinatiion => destinatiion.reviews, { onDelete: "CASCADE" })
+    destination: Destination
 
     @ManyToOne(() => User)
     user: User

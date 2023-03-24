@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js'
 import Dest_Image from '../entities/dest_image'
 import Destination from '../entities/destination'
 import appDataSource from '../ormconfig'
@@ -8,6 +9,7 @@ let addDestMiddleware = (city: string, name: string, description: string) => {
     newDestination.city = city
     newDestination.name = name 
     newDestination.description = description
+    newDestination.rating = new Decimal(0)
     appDataSource.manager.save(newDestination)
 }
 

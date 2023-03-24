@@ -15,14 +15,13 @@ let addUserReviewMiddleware = async (text: string, stars: number, ratedUser: Use
     await userReviewRepo.save(newReview)
 }
 
-let fetchReview = (id: string, obj = {}) => {
+let fetchUserReview = (id: string, obj = {}) => {
     let userReviewRepo = appDataSource.getRepository(User_review)
     return userReviewRepo.findOne({ where: { id: id }, relations: obj })
 }
 
-let updateUserReviews = async (id: string) => {
-    let userToUpdate = await fetchUser(id, { myReviews: true })
-    let avg = await appDataSource.getRepository(User_review).createQueryBuilder('user_review').select('AVG(user_review.stars)', 'average').where('user_review.ratedUserId = :ratedUserId', { ratedUserId: id }).getRawOne();
+let updateUserReviews = async (userToUpdate: User) => {
+    let avg = await appDataSource.getRepository(User_review).createQueryBuilder('user_review').select('AVG(user_review.stars)', 'average').where('user_review.ratedUserId = :ratedUserId', { ratedUserId: userToUpdate.id }).getRawOne();
     if (avg.average) {
         userToUpdate!.rating = avg.average
         appDataSource.manager.save(userToUpdate)
@@ -41,7 +40,7 @@ let editUserReviewMiddleware = async (newText: string, newStars: number, userRev
 
 export {
     addUserReviewMiddleware,
-    fetchReview,
+    fetchUserReview,
     updateUserReviews,
     editUserReviewMiddleware
 }
