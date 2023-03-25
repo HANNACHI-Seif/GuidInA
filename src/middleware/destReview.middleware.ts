@@ -23,7 +23,11 @@ let fetchDestReview = (id: string, obj={}) => {
 }
 
 let updateDestReview = async (DestToUpdate: Destination) => {
-    let avg = await appDataSource.getRepository(Dest_Review).createQueryBuilder('dest_review').select('AVG(dest_review.stars)', 'average').where('dest_review.destination = :destinationId', { destinationId: DestToUpdate.id }).getRawOne();
+    let avg = await appDataSource.getRepository(Dest_Review)
+        .createQueryBuilder('dest_review')
+            .select('AVG(dest_review.stars)', 'average')
+                .where('dest_review.destinationId = :destinationId', { destinationId: DestToUpdate.id })
+                    .getRawOne();
     if (avg.average) {
         DestToUpdate!.rating = avg.average
         appDataSource.manager.save(DestToUpdate)

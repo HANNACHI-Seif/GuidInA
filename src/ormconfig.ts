@@ -12,6 +12,7 @@ import Restaurant_Image from './entities/restaurant_image'
 import Hotel from './entities/hotel'
 import Hotel_Image from './entities/hotel_image'
 import Dest_Review from './entities/dest_review'
+import Hotel_Review from './entities/hotel_review'
 
 export default new DataSource({
     type: "mysql",
@@ -19,10 +20,12 @@ export default new DataSource({
     port: 3306,
     username: "seifon",
     password: "",
-    database: "auth_db",
+    database: "guidina",
     synchronize: true,
     logging: false,
-    entities: [User, Post, Comment, Like, RefreshToken, Destination , Dest_Image, User_review, Restaurant, Restaurant_Image, Hotel, Hotel_Image, Dest_Review],
+    entities: [ User, Post, Comment, Like, RefreshToken,
+                Destination , Dest_Image, User_review, Restaurant,
+                Restaurant_Image, Hotel, Hotel_Image, Dest_Review, Hotel_Review ],
     subscribers: [],
     migrations: [], 
 })

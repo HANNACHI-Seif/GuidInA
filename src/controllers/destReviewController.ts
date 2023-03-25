@@ -10,11 +10,10 @@ let addDestinationReview = async (req: Request, res: Response) => {
     try {
         let user = req.user!
         let ratedDest = await fetchDest(req.params.id)
-        let userId = user.id
         let reviewed = await appDataSource
             .getRepository(Dest_Review)
                 .createQueryBuilder('dest_review')
-                    .where('dest_review.userId = :userId', { userId })
+                    .where('dest_review.userId = :userId', { userId: user.id })
                         .andWhere('dest_review.destinationId = :destId', { destId: req.params.id })
                             .getOne()
         if (!ratedDest || reviewed ) throw new Error("something went wrong")
@@ -43,7 +42,7 @@ let fetchDestReviews = async (req: Request, res: Response) => {
     }
 }
 
-let deleteDestinationReiew = async (req: Request, res: Response) => {
+let deleteDestinationReview = async (req: Request, res: Response) => {
     try {
         let user = req.user!
         let reviewToDelete = await fetchDestReview(req.params.id, { destination: true, user: true })
@@ -83,7 +82,7 @@ let editDestReview = async (req: Request, res: Response) => {
 
 export {
     addDestinationReview,
-    deleteDestinationReiew,
+    deleteDestinationReview,
     fetchDestReviews,
     editDestReview
 }

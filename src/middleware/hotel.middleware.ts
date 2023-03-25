@@ -2,6 +2,8 @@ import Hotel from '../entities/hotel'
 import appDataSource from '../ormconfig'
 import fs from 'fs'
 import Hotel_Image from '../entities/hotel_image'
+import Decimal from 'decimal.js'
+
 
 let addHotelMiddleware = (city: string, name: string, description: string, stars: number) => {
     let newHotel = new Hotel()
@@ -9,6 +11,7 @@ let addHotelMiddleware = (city: string, name: string, description: string, stars
     newHotel.name = name 
     newHotel.description = description
     newHotel.stars = stars;
+    newHotel.rating = new Decimal(0)
     appDataSource.manager.save(newHotel)
 }
 

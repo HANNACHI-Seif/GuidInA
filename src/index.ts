@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import RefreshToken from "./entities/refreshToken";
 import Like from "./entities/like"
 import Comment from "./entities/comment";
+
 import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
@@ -13,6 +14,8 @@ import userReviewRoutes from './routes/userReviewRoutes';
 import hotelRoutes from './routes/hotelRoutes';
 import restaurantRoutes from './routes/restaurantRoutes'
 import destReviewRoutes from './routes/destReviewRoutes'
+import hotelReviewRoutes from './routes/hotelReviewRoutes'
+
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
 import User_review from "./entities/user_review";
@@ -134,7 +137,7 @@ require("dotenv").config();
     app.get('/allHotels', async (req: Request, res: Response) => {
         try {
             let hotelRepo = appDataSource.getRepository(Hotel)
-            let hotels = await hotelRepo.find({ relations: { images: true } })
+            let hotels = await hotelRepo.find({ relations: { images: true, reviews: true } })
             res.json({ hotels })
         } catch (error) {
             console.log(error)
@@ -162,11 +165,14 @@ require("dotenv").config();
     //destination routes
     app.use('/destination', destRoutes)
 
-    //destination reviews
+    //destination review routes
     app.use('/destination-reviews', destReviewRoutes)
 
     //hotel routes
     app.use('/hotel', hotelRoutes)
+
+    //hotel review routes
+    app.use('/hotel-reviews', hotelReviewRoutes)
 
     //restaurant routes
     app.use('/restaurant', restaurantRoutes)
