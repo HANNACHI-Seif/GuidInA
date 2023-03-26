@@ -1,11 +1,11 @@
+//important imports
 import express, { Request, Response } from "express";
 import appDataSource from "./ormconfig"
-import User from "./entities/user";
 import cookieParser from 'cookie-parser';
-import RefreshToken from "./entities/refreshToken";
-import Like from "./entities/like"
-import Comment from "./entities/comment";
+import { config } from 'dotenv';
+config();
 
+//routes imports
 import authRoutes from './routes/authRoutes'
 import postRoutes from './routes/postRoutes'
 import adminRoutes from './routes/adminRoutes'
@@ -15,12 +15,19 @@ import hotelRoutes from './routes/hotelRoutes';
 import restaurantRoutes from './routes/restaurantRoutes'
 import destReviewRoutes from './routes/destReviewRoutes'
 import hotelReviewRoutes from './routes/hotelReviewRoutes'
+import restReviewRoutes from './routes/restReviewRoutes'
 
+//test imports
 import Destination from "./entities/destination";
 import Dest_Image from "./entities/dest_image";
 import User_review from "./entities/user_review";
 import Restaurant from "./entities/restaurant";
 import Hotel from "./entities/hotel";
+import Comment from "./entities/comment";
+import RefreshToken from "./entities/refreshToken";
+import Like from "./entities/like"
+import User from "./entities/user";
+
 declare global {
     namespace Express {
       interface Request {
@@ -28,9 +35,8 @@ declare global {
       }
     }
   }
-require("dotenv").config();
 
-//routes
+
 
 
 (async() => {
@@ -126,7 +132,7 @@ require("dotenv").config();
     app.get('/allRestaurants', async (req: Request, res: Response) => {
         try {
             let restRepo = appDataSource.getRepository(Restaurant)
-            let restaurants = await restRepo.find({relations: { images: true }});
+            let restaurants = await restRepo.find({relations: { images: true, reviews: true }});
             res.json({restaurants})
         } catch (error) {
             console.log(error)
@@ -177,12 +183,14 @@ require("dotenv").config();
     //restaurant routes
     app.use('/restaurant', restaurantRoutes)
 
+    //restaurant review routes
+    app.use('/restaurant-reviews', restReviewRoutes)
 
-    //FINISH REVVIEWS
-    //TODO: reviews for destinations/restaurants/hotels
+
+    //TODO: user can have multiple roles
     //TODO: car posts / house posts
     //TODO: role application form
-    //TODO: error handling of everything else
+    
     
 
 

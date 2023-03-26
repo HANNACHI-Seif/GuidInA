@@ -59,14 +59,12 @@ let deleteDestinationReview = async (req: Request, res: Response) => {
 
 let editDestReview = async (req: Request, res: Response) => {
     try {
-        let userId = req.user!.id
-        let reviewId = req.params.id
         let ReviewToEdit = await appDataSource.getRepository(Dest_Review)
             .createQueryBuilder("dest_review")
             //.select(["dest_review.destination", "dest_review.id", "dest_review.text"]) how to select only certain fields
                 .leftJoinAndSelect("dest_review.destination","destination")
-                    .where("dest_review.userId = :userId", { userId: userId })
-                        .andWhere("dest_review.id = :reviewId", { reviewId: reviewId })
+                    .where("dest_review.userId = :userId", { userId: req.user!.id })
+                        .andWhere("dest_review.id = :reviewId", { reviewId: req.params.id })
                             .getOne()
         if (!ReviewToEdit) throw new Error("something went wrong")
         let { newText, newStars }: { newText: string, newStars: number } = req.body

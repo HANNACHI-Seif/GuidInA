@@ -1,7 +1,8 @@
 import appDataSource from '../ormconfig'
 import fs from 'fs'
 import Restaurant from '../entities/restaurant'
-import Restaurant_Image from '../entities/restaurant_image'
+import Rest_Image from '../entities/rest_image'
+import Decimal from 'decimal.js'
 
 let addRestaurantMiddleware = (city: string, name: string, description: string, type: string) => {
     let newRestaurant = new Restaurant()
@@ -9,6 +10,7 @@ let addRestaurantMiddleware = (city: string, name: string, description: string, 
     newRestaurant.name = name 
     newRestaurant.description = description
     newRestaurant.type = type;
+    newRestaurant.rating = new Decimal(0)
     appDataSource.manager.save(newRestaurant)
 }
 
@@ -18,19 +20,19 @@ let fetchRestaurant = (restaurantId: string, obj = {}) => {
 }
 
 let addRestaurantImageMiddleware = (url : string, restaurant: Restaurant) => {
-    let imageRestaurantRepo = appDataSource.getRepository(Restaurant_Image)
-    let newRestaurantImage = new Restaurant_Image
+    let imageRestaurantRepo = appDataSource.getRepository(Rest_Image)
+    let newRestaurantImage = new Rest_Image
     newRestaurantImage.url = url
     newRestaurantImage.restaurant = restaurant
     imageRestaurantRepo.save(newRestaurantImage)
 }
 
 let fetchRestaurantImage = (restaurantImageId: string) => {
-    let restaurantImageRepo = appDataSource.getRepository(Restaurant_Image)
+    let restaurantImageRepo = appDataSource.getRepository(Rest_Image)
     return restaurantImageRepo.findOne({ where: { id: restaurantImageId } })
 }
 
-let deleteRestaurantImageMiddleware = (image: Restaurant_Image) => {
+let deleteRestaurantImageMiddleware = (image: Rest_Image) => {
     appDataSource.manager.remove(image)
     if ( fs.existsSync(image.url) ) fs.unlinkSync(image.url)
 }

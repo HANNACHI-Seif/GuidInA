@@ -8,11 +8,12 @@ import Destination from './entities/destination'
 import Dest_Image from './entities/dest_image'
 import User_review from './entities/user_review'
 import Restaurant from './entities/restaurant'
-import Restaurant_Image from './entities/restaurant_image'
+import Rest_Image from './entities/rest_image'
 import Hotel from './entities/hotel'
 import Hotel_Image from './entities/hotel_image'
 import Dest_Review from './entities/dest_review'
 import Hotel_Review from './entities/hotel_review'
+import Rest_Review from './entities/rest_review'
 
 export default new DataSource({
     type: "mysql",
@@ -23,9 +24,10 @@ export default new DataSource({
     database: "guidina",
     synchronize: true,
     logging: false,
-    entities: [ User, Post, Comment, Like, RefreshToken,
-                Destination , Dest_Image, User_review, Restaurant,
-                Restaurant_Image, Hotel, Hotel_Image, Dest_Review, Hotel_Review ],
+    entities: [ User, Post, Comment, Like, RefreshToken, User_review,
+                Destination , Dest_Image, Dest_Review,
+                Restaurant, Rest_Image, Rest_Review,
+                Hotel, Hotel_Image, Hotel_Review ],
     subscribers: [],
     migrations: [], 
 })

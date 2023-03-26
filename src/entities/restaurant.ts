@@ -1,5 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from "typeorm"
-import Restaurant_Image from "./restaurant_image"
+import Rest_Image from "./rest_image"
+import Rest_Review from "./rest_review"
+import DecimalTransformer from "../utilities/float._."
+import Decimal from "decimal.js"
 
 @Entity()
 export default class Restaurant {
@@ -18,8 +21,14 @@ export default class Restaurant {
     @Column()
     type: string
 
-    @OneToMany(() => Restaurant_Image , rest_image => rest_image.restaurant, {cascade: true})
-    images: Restaurant_Image[]
+    @Column( "decimal", { default: new Decimal(0), precision: 6, scale: 1, transformer: new DecimalTransformer()})
+    rating: Decimal
+
+    @OneToMany(() => Rest_Image , rest_image => rest_image.restaurant, {cascade: true})
+    images: Rest_Image[]
+
+    @OneToMany(() => Rest_Review, rest_review => rest_review.restaurant, {cascade: true})
+    reviews: Rest_Review[]
 
 
 }

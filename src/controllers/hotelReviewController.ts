@@ -60,13 +60,11 @@ let deleteHotelReview = async (req: Request, res: Response) => {
 
 let editHotelReview = async (req: Request, res: Response) => {
     try {
-        let userId = req.user!.id
-        let reviewId = req.params.id
         let ReviewToEdit = await appDataSource.getRepository(Hotel_Review)
             .createQueryBuilder("hotel_review")
                 .leftJoinAndSelect("hotel_review.hotel","hotel")
-                    .where("hotel_review.userId = :userId", { userId: userId })
-                        .andWhere("hotel_review.id = :reviewId", { reviewId: reviewId })
+                    .where("hotel_review.userId = :userId", { userId: req.user!.id })
+                        .andWhere("hotel_review.id = :reviewId", { reviewId: req.params.id })
                             .getOne()
         if (!ReviewToEdit) throw new Error("something went wrong")
         let { newText, newStars }: { newText: string, newStars: number } = req.body

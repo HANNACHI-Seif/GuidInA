@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
 import Restaurant from "./restaurant"
 
 @Entity()
-export default class Restaurant_Image {
+export default class Rest_Image {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
