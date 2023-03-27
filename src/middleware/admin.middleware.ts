@@ -5,7 +5,8 @@ import roles from '../constants/roles'
 
 
 let adminCheck = (req: Request, res: Response, next: NextFunction) => {
-    if ( req.user?.role !== roles.ADMIN ) res.json({ msg: "unauthorized" })
+    let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
+    if ( !isAdmin ) res.json({ msg: "unauthorized" })
     else next()
 }
 

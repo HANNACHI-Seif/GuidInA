@@ -16,7 +16,8 @@ let addUserReview = async (req: Request, res: Response) => {
                     .where('user_review.userId = :userId', { userId })
                         .andWhere('user_review.ratedUserId = :ratedUserId', { ratedUserId: req.params.id })
                             .getOne()
-        if (!ratedUser || ratedUser.role == roles.TOURIST || reviewed || user.id == req.params.id ) throw new Error("something went wrong")
+        let isServiceProvider = user.roles.some(role => [roles.CAR_RENTOR, roles.GUIDE, roles.HOUSE_RENTOR, roles.TRANSLATOR].includes(role.roleName))
+        if (!ratedUser || !isServiceProvider || reviewed || user.id == req.params.id ) throw new Error("something went wrong")
         let {text, stars}: {text: string, stars: number} = req.body
         if (stars > 5 || stars < 1) throw new Error("unvalid input")
         await addUserReviewMiddleware(text, stars, ratedUser!, user!)
@@ -47,7 +48,8 @@ let deleteUserReview = async (req: Request, res: Response) => {
         let user = req.user!
         let reviewToDelete = await fetchUserReview(req.params.id, { ratedUser: true, user: true })
         if ( !reviewToDelete ) throw new Error("something went wrong")
-        if (user.role !== roles.ADMIN && user.id !== reviewToDelete?.user.id) throw new Error("unauthorized")
+        let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
+        if (!isAdmin && user.id !== reviewToDelete?.user.id) throw new Error("unauthorized")
         await appDataSource.manager.remove(reviewToDelete)
         await updateUserReviews(reviewToDelete!.ratedUser)
         res.json({ msg: "review deleted" })

@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, Length } from "class-validator"
-import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn, ManyToMany, JoinTable } from "typeorm"
 import Post from './post'
 import Like from "./like"
 import RefreshToken from "./refreshToken"
@@ -7,6 +7,7 @@ import Comment from "./comment"
 import User_review from "./user_review"
 import  DecimalTransformer  from "../utilities/float._."
 import Decimal from "decimal.js"
+import Role from "./role"
 
 
 @Entity()
@@ -31,8 +32,9 @@ export default class User {
     @IsNotEmpty({ message: "password is required"})
     password: string
 
-    @Column()
-    role: string
+    @ManyToMany(() => Role)
+    @JoinTable()
+    roles: Role[]
 
     @Column( "decimal", {precision: 6, scale: 1, transformer: new DecimalTransformer(), default: 0.0})
     rating: Decimal

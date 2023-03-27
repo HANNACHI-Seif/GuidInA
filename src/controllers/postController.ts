@@ -29,7 +29,8 @@ let delete_Post = async (req: Request, res: Response) => {
         let user: User = req.user!
         let postToDelete = await fetchPost(req.params.id, { user: true }) 
         if (!postToDelete) throw new Error("post not found!")
-        if ((postToDelete.user.id !== user.id) && (user.role !== roles.ADMIN)) throw new Error("Unauthorized")
+        let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
+        if ((postToDelete.user.id !== user.id) && (!isAdmin)) throw new Error("Unauthorized")
         //delete
         appDataSource.manager.remove(postToDelete)
         if (fs.existsSync(postToDelete.imageUrl)) {
@@ -99,7 +100,8 @@ let delete_Comment = async (req: Request, res: Response) => {
         let comment = await fetchComment(req.params.commentId)
         if (!post || !comment) throw new Error("something went wrong")
         let commentInPost = post.comments.some((postComment) => postComment?.id == comment!.id)
-        if (!commentInPost || (user.role !== roles.ADMIN && user.id !== comment.user.id && user.id !== post.user.id)) throw new Error("unauthorized")
+        let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
+        if (!commentInPost || (!isAdmin && user.id !== comment.user.id && user.id !== post.user.id)) throw new Error("unauthorized")
         //delete
         await deleteComment(comment.id)
         res.json({ msg: "deleted" })

@@ -5,13 +5,18 @@ import Post from "../entities/post"
 import fs from 'fs'
 import  roles  from "../constants/roles"
 import Decimal from "decimal.js"
+import Role from "../entities/role"
 
 
-let createUser = async (username: string, password: string, email: string, role: string = roles.TOURIST) => {
+let createUser = async (username: string, password: string, email: string, Roles: roles[] = [roles.TOURIST]) => {
     let newUser = new User()
     newUser.username = username
     newUser.email = email
-    newUser.role = role
+    newUser.roles = []
+    Roles.forEach( async(role) => {
+        let fetchedRole = await appDataSource.getRepository(Role).findOne({ where: { roleName: role } })
+        if (fetchedRole) newUser.roles.push(fetchedRole)
+    })
     newUser.rating = new Decimal(0.0);
     newUser.password = (await generateHash(password))!
     let userRepo = appDataSource.getRepository(User)
@@ -52,13 +57,17 @@ let deleteUser = async (id: string) => {
     }
 }
 
-let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: string, newEmail: string, newRole: string) => {
+let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: string, newEmail: string, newRole: roles[]) => {
     if (newUsername) userToEdit.username = newUsername
     if (newEmail) userToEdit.email = newEmail
     if (newPassword) userToEdit.password = await generateHash(newPassword)
-    if (newRole) userToEdit.role = newRole
+    if (newRole) newRole.forEach( async (role) => {
+        let fetchedRole = await appDataSource.getRepository(Role).findOne({where: { roleName: role } })
+        if (fetchedRole) userToEdit.roles.push(fetchedRole)
+    } )
     appDataSource.manager.save(userToEdit)
 }
+//newRole should be an array of roles string example : ["guide", "translator"]
 
 export {
     createUser, 

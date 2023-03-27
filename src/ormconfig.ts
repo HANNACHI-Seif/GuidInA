@@ -14,6 +14,7 @@ import Hotel_Image from './entities/hotel_image'
 import Dest_Review from './entities/dest_review'
 import Hotel_Review from './entities/hotel_review'
 import Rest_Review from './entities/rest_review'
+import Role from './entities/role'
 
 export default new DataSource({
     type: "mysql",
@@ -24,7 +25,7 @@ export default new DataSource({
     database: "guidina",
     synchronize: true,
     logging: false,
-    entities: [ User, Post, Comment, Like, RefreshToken, User_review,
+    entities: [ User, Post, Comment, Like, RefreshToken, User_review, Role,
                 Destination , Dest_Image, Dest_Review,
                 Restaurant, Rest_Image, Rest_Review,
                 Hotel, Hotel_Image, Hotel_Review ],

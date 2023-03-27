@@ -47,7 +47,8 @@ let deleteDestinationReview = async (req: Request, res: Response) => {
         let user = req.user!
         let reviewToDelete = await fetchDestReview(req.params.id, { destination: true, user: true })
         if (!reviewToDelete) throw new Error("something went wrong")
-        if ( user.role !== roles.ADMIN && user.id !== reviewToDelete.user.id ) throw new Error("unauthorized")
+        let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
+        if ( !isAdmin && user.id !== reviewToDelete.user.id ) throw new Error("unauthorized")
         await appDataSource.manager.remove(reviewToDelete)
         await updateDestReview(reviewToDelete.destination)
         res.json({ msg: "deleted a review" })

@@ -27,6 +27,9 @@ import Comment from "./entities/comment";
 import RefreshToken from "./entities/refreshToken";
 import Like from "./entities/like"
 import User from "./entities/user";
+import Role from "./entities/role";
+import roles from "./constants/roles";
+import { fetchUserByusrn } from "./middleware/user.middleware";
 
 declare global {
     namespace Express {
@@ -51,6 +54,52 @@ declare global {
     app.listen(process.env.PORT, () => console.log("listening..."))
 
     //testing routes:
+    app.post('/create_roles', async (req: Request, res: Response) => {
+        try {
+            let tourist = new Role()
+            tourist.roleName = roles.TOURIST
+            let admin = new Role()
+            admin.roleName = roles.ADMIN
+            let guide = new Role()
+            guide.roleName = roles.GUIDE
+            let carRenter = new Role()
+            carRenter.roleName = roles.CAR_RENTOR
+            let houseRenter = new Role()
+            houseRenter.roleName = roles.HOUSE_RENTOR
+            let translator = new Role()
+            translator.roleName = roles.TRANSLATOR
+            await appDataSource.manager.save([tourist, admin, translator, guide, carRenter, houseRenter])
+            res.json({ msg: "roles created!" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "failed" })
+        }
+    })
+
+    app.get('/roles', async (req: Request, res: Response) => {
+        try {
+            let roles = await appDataSource.getRepository(Role).find()
+            res.json({ roles })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "failed" })
+        }
+    })
+
+    app.post('/make_admin', async (req: Request, res: Response) => {
+        try {
+            let { username } = req.body
+            let user = await appDataSource.getRepository(User).findOne({ where: { username: username }, relations: { roles: true } })
+            let admin = await appDataSource.getRepository(Role).findOne({ where: { roleName: roles.ADMIN } })
+            user?.roles.push(admin!)
+            await appDataSource.manager.save(user)
+            res.json({ msg: "this user is now admin" })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: error.message })
+        }
+    })
+
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
@@ -60,6 +109,7 @@ declare global {
                 tokens: true, 
                 posts: true, 
                 myReviews: true,
+                roles: true 
             } })
             res.json({users})
         } catch (err) {
