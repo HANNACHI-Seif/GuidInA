@@ -54,7 +54,7 @@ declare global {
     app.listen(process.env.PORT, () => console.log("listening..."))
 
     //testing routes:
-    app.post('/create_roles', async (req: Request, res: Response) => {
+    app.post('/create_roles', async (req: Request, res: Response) => { //this function is used to create roles in the database
         try {
             let tourist = new Role()
             tourist.roleName = roles.TOURIST
@@ -86,7 +86,7 @@ declare global {
         }
     })
 
-    app.post('/make_admin', async (req: Request, res: Response) => {
+    app.post('/make_admin', async (req: Request, res: Response) => { //this function is used to modify a user to admin just for testing :p
         try {
             let { username } = req.body
             let user = await appDataSource.getRepository(User).findOne({ where: { username: username }, relations: { roles: true } })
@@ -237,7 +237,6 @@ declare global {
     app.use('/restaurant-reviews', restReviewRoutes)
 
 
-    //TODO: user can have multiple roles
     //TODO: car posts / house posts
     //TODO: role application form
     

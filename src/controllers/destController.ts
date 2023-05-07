@@ -5,8 +5,8 @@ import appDataSource from '../ormconfig'
 
 let addDestination = async (req: Request, res: Response) => {
     try {
-        let { name, description, city }: { name: string, description: string, city: string } = req.body
-        await addDestMiddleware(city, name, description)
+        let { name, description, city, maps_link }: { name: string, description: string, city: string, maps_link: string } = req.body
+        await addDestMiddleware(city, name, description, maps_link)
         res.json({ msg: "destination added" })
     } catch (error) {
         console.log(error)
@@ -57,8 +57,8 @@ let editDest = async (req: Request, res: Response) => {
     try {
         let destToEdit = await fetchDest(req.params.id)
         if ( !destToEdit ) throw new Error("something went wrong")
-        let { newname, newcity, newDescription }: { newname: string, newcity: string, newDescription: string } = req.body
-        await editDestmiddleware(destToEdit, newname, newcity, newDescription)
+        let { newname, newcity, newDescription, new_maps_link }: { newname: string, newcity: string, newDescription: string, new_maps_link: string } = req.body
+        await editDestmiddleware(destToEdit, newname, newcity, newDescription, new_maps_link)
         res.json({ msg: "destination edited" })
     } catch (error) {
         console.log(error)
