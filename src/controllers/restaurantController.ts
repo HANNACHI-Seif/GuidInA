@@ -5,8 +5,8 @@ import appDataSource from '../ormconfig'
 
 let addRestaurant = async (req: Request, res: Response) => {
     try {
-        let { name, description, city, type }: { name: string, description: string, city: string, type: string } = req.body
-        await addRestaurantMiddleware(city, name, description, type)
+        let { name, description, city, type, maps_link }: { name: string, description: string, city: string, type: string, maps_link: string } = req.body
+        await addRestaurantMiddleware(city, name, description, type, maps_link)
         res.json({ msg: "restaurant added" })
     } catch (error) {
         console.log(error)
@@ -57,8 +57,8 @@ let editRestaurant = async (req: Request, res: Response) => {
     try {
         let restaurantToEdit = await fetchRestaurant(req.params.id)
         if ( !restaurantToEdit ) throw new Error("something went wrong")
-        let { newname, newcity, newDescription, newType }: { newname: string, newcity: string, newDescription: string, newType: string } = req.body
-        await editRestaurantmiddleware(restaurantToEdit, newname, newcity, newDescription, newType)
+        let { newname, newcity, newDescription, newType, new_maps_link }: { newname: string, newcity: string, newDescription: string, newType: string, new_maps_link: string } = req.body
+        await editRestaurantmiddleware(restaurantToEdit, newname, newcity, newDescription, newType, new_maps_link)
         res.json({ msg: "restaurant edited" })
     } catch (error) {
         console.log(error)

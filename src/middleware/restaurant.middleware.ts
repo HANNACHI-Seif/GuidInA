@@ -4,12 +4,13 @@ import Restaurant from '../entities/restaurant'
 import Rest_Image from '../entities/rest_image'
 import Decimal from 'decimal.js'
 
-let addRestaurantMiddleware = (city: string, name: string, description: string, type: string) => {
+let addRestaurantMiddleware = (city: string, name: string, description: string, type: string, maps_link: string) => {
     let newRestaurant = new Restaurant()
     newRestaurant.city = city
     newRestaurant.name = name 
     newRestaurant.description = description
     newRestaurant.type = type;
+    newRestaurant.maps_link = maps_link
     newRestaurant.rating = new Decimal(0)
     appDataSource.manager.save(newRestaurant)
 }
@@ -37,11 +38,12 @@ let deleteRestaurantImageMiddleware = (image: Rest_Image) => {
     if ( fs.existsSync(image.url) ) fs.unlinkSync(image.url)
 }
 
-let editRestaurantmiddleware = (restaurantToEdit: Restaurant, newname: string, newcity: string, newDescription: string, newType: string) => {
+let editRestaurantmiddleware = (restaurantToEdit: Restaurant, newname: string, newcity: string, newDescription: string, newType: string, new_maps_link: string) => {
     if (newname) restaurantToEdit.name = newname
     if (newcity) restaurantToEdit.city = newcity
     if (newDescription) restaurantToEdit.description = newDescription
     if (newType) restaurantToEdit.type = newType
+    if (new_maps_link) restaurantToEdit.maps_link = new_maps_link
     appDataSource.manager.save(restaurantToEdit)
 }
 

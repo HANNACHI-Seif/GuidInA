@@ -21,6 +21,9 @@ export default class Restaurant {
     @Column()
     type: string
 
+    @Column()
+    maps_link: string
+
     @Column( "decimal", { default: new Decimal(0), precision: 6, scale: 1, transformer: new DecimalTransformer()})
     rating: Decimal
 
