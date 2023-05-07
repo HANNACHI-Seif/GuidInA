@@ -5,12 +5,13 @@ import Hotel_Image from '../entities/hotel_image'
 import Decimal from 'decimal.js'
 
 
-let addHotelMiddleware = (city: string, name: string, description: string, stars: number) => {
+let addHotelMiddleware = (city: string, name: string, description: string, stars: number, maps_link: string) => {
     let newHotel = new Hotel()
     newHotel.city = city
     newHotel.name = name 
     newHotel.description = description
-    newHotel.stars = stars;
+    newHotel.stars = stars
+    newHotel.maps_link = maps_link
     newHotel.rating = new Decimal(0)
     appDataSource.manager.save(newHotel)
 }
@@ -38,11 +39,12 @@ let deleteHotelImageMiddleware = (image: Hotel_Image) => {
     if ( fs.existsSync(image.url) ) fs.unlinkSync(image.url)
 }
 
-let editHotelmiddleware = (hotelToEdit: Hotel, newname: string, newcity: string, newDescription: string, newStars: number) => {
+let editHotelmiddleware = (hotelToEdit: Hotel, newname: string, newcity: string, newDescription: string, newStars: number, new_maps_link: string) => {
     if (newname) hotelToEdit.name = newname
     if (newcity) hotelToEdit.city = newcity
     if (newDescription) hotelToEdit.description = newDescription
     if (newStars) hotelToEdit.stars = newStars
+    if (new_maps_link) hotelToEdit.maps_link = new_maps_link
     appDataSource.manager.save(hotelToEdit)
 }
 

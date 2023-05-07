@@ -19,6 +19,9 @@ export default class Hotel {
     description: string
 
     @Column()
+    maps_link: string
+
+    @Column()
     stars: number
 
     @Column( "decimal", { default: new Decimal(0), precision: 6, scale: 1, transformer: new DecimalTransformer()})
