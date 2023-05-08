@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 import sendResetPasswordEmail from "../utilities/resetEmail";
+import sendConfirmationEmail from "../utilities/confirmation_email";
 
 
 
@@ -15,17 +16,37 @@ let register_user = async (req: Request, res: Response) => {
         //creating new user
         let newUser = await createUser(username, password, email)
         //creating access&refresh token
-        let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
-        let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-        await createToken(refresh, newUser)
+        //let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
+        //let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+        //await createToken(refresh, newUser)
+
+        //send confirmation email
+        let email_confirmation_token = await generateToken({ id: newUser.id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
+        const link = `${process.env.BASE_URL}/user/confirmation/${email_confirmation_token}`
+        sendConfirmationEmail(email, username, link)
         //response 
-        res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-        //res.json({ accessToken, refresh })
+        //res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
+        res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })
     } catch (error) {
         console.log(error)
         res.json({ msg: "could not add user" })
     }
 
+}
+
+let confirmEmailGet = async (req: Request, res: Response) => {
+    try {
+        let token = req.params.token
+        let { id }: { id: string }= jwt.verify(token, process.env.EMAIL_TOKEN_SECRET!) as { id: string }
+        let user = await fetchUser(id)
+        if (!user) throw new Error("Unvalid token!")
+        user.email_confirmed = true
+        appDataSource.manager.save(user)
+        res.json({ msg: "email confirmed" })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: "failed to confirm token:(" })
+    }
 }
 
 let loginUser = async (req: Request, res: Response) => {
@@ -34,6 +55,8 @@ let loginUser = async (req: Request, res: Response) => {
         let userByUsername = await fetchUserByusrn(username)
         if (!userByUsername) throw new Error("uncorrect username or password!")
         if (await bcrypt.compare(password, userByUsername!.password)) {
+            //check if email confirmed
+            if (!userByUsername.email_confirmed) throw new Error("Please confirm your email")
             //creating access&refresh token
             let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
             let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
@@ -43,7 +66,7 @@ let loginUser = async (req: Request, res: Response) => {
         } else throw new Error("uncorrect username or password!")
     } catch (error) {
         console.log(error)
-        res.json({ msg: error })
+        res.json({ msg: error.message })
     }
 }
 
@@ -148,5 +171,6 @@ export {
     userEditPassword,
     forgotPassword,
     resetPasswordPost,
-    resetPasswordGet
+    resetPasswordGet,
+    confirmEmailGet
 }

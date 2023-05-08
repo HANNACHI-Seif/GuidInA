@@ -36,6 +36,9 @@ export default class User {
     @JoinTable()
     roles: Role[]
 
+    @Column({ default: false })
+    email_confirmed: boolean
+
     @Column( "decimal", {precision: 6, scale: 1, transformer: new DecimalTransformer(), default: 0.0})
     rating: Decimal
 

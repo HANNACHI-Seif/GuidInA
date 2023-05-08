@@ -1,5 +1,5 @@
 import express from 'express'
-import { forgotPassword, loginUser, logoutUser, refreshAccessToken, register_user, resetPasswordGet, resetPasswordPost, userEditPassword } from '../controllers/authController'
+import { confirmEmailGet, forgotPassword, loginUser, logoutUser, refreshAccessToken, register_user, resetPasswordGet, resetPasswordPost, userEditPassword } from '../controllers/authController'
 import { authMiddleware, refreshMiddleware } from '../utilities/token'
 let router = express.Router()
 
@@ -12,6 +12,8 @@ router.post('/logout', authMiddleware, logoutUser)
 router.post('/refresh', refreshMiddleware, refreshAccessToken)
 
 router.patch('/password', authMiddleware, userEditPassword)
+
+router.get('/confirmation/:token', confirmEmailGet)
 
 router.post('/forgotPassword', forgotPassword)
 
