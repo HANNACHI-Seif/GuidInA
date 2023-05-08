@@ -28,7 +28,7 @@ let register_user = async (req: Request, res: Response) => {
         //res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
         res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
         res.json({ msg: "could not add user" })
     }
 
@@ -58,7 +58,7 @@ let loginUser = async (req: Request, res: Response) => {
             //check if email confirmed
             if (!userByUsername.email_confirmed) throw new Error("Please confirm your email")
             //creating access&refresh token
-            let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
+            let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '7d')
             let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             await createToken(refresh, userByUsername!)
             //response
@@ -86,13 +86,15 @@ let logoutUser = async (req: Request, res: Response) => {
 
 }
 
-let refreshAccessToken = (req: Request, res: Response) => {
+let refreshAccessToken = async (req: Request, res: Response) => {
     try {
         let user = req.user!
         //refreshing token
         let data = { id: user.id }
         let newAccessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '1d' })
-        res.json({ newAccessToken, msg: "token refreshed" })
+        let newRefreshToken = jwt.sign(data, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '7d' })
+        await createToken(newRefreshToken, user)
+        res.cookie("jwt", newRefreshToken).json({ newAccessToken, msg: "token refreshed" })
     } catch (error) {
         console.log(error)
         res.json({ msg: "something went wrong" })

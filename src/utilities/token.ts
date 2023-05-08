@@ -14,11 +14,11 @@ interface DecodedToken {
 let authToken = async (token: string, secret: string) => {
     try {
         let data: DecodedToken = jwt.verify(token, secret) as DecodedToken;
-        let user = await fetchUser(data.id, { roles: true })
+        let user = await fetchUser(data.id, { roles: true, tokens: true })
         return user;
     }
     catch (err) {
-        console.log(err);
+        console.log(err.message);
         return null
     }
 }
@@ -50,16 +50,18 @@ let refreshMiddleware = async (req: Request, res: Response, next: NextFunction) 
         if (!refreshToken) throw new Error("Unauthorized")
         let user = await authToken(refreshToken, process.env.REFRESH_TOKEN_SECRET!)
         let storedToken = await fetchToken(refreshToken)
+        if (!storedToken) throw new Error("invalid token, Please login and try again")
         if (!user) {
             await appDataSource.manager.remove(storedToken)
-            throw new Error("Unvalid token, please login and try again")
+            throw new Error("invalid token, please login and try again")
         }
-        if (!storedToken || storedToken.user.id !== user!.id) throw new Error("Unvalid token, please login and try again")
+        if (storedToken.user.id !== user!.id) throw new Error("invalid token, please login and try again")
         req.user = user
+        await appDataSource.manager.remove(storedToken)
         next()
     } catch (error) {
         console.log(error)
-        res.json({ msg: "unauthorized, please login" })
+        res.json({ msg: "unauthorized, please login", error: error.message })
     }
 }
 
