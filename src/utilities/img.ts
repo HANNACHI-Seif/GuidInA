@@ -30,7 +30,7 @@ let upload = multer({
     limits
 })
 
-const handleFileUpload = (req: any, res: any, next: NextFunction) => {
+const handleImageUpload = (req: any, res: any, next: NextFunction) => {
     upload.single('image')(req, res, (err) => {
       if (err instanceof MulterError) {
         // Multer error occurred
@@ -51,4 +51,4 @@ const handleFileUpload = (req: any, res: any, next: NextFunction) => {
     });
   };
 
-export default handleFileUpload
+export default handleImageUpload

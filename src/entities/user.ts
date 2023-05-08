@@ -18,7 +18,6 @@ export default class User {
     @Column()
     @IsNotEmpty({ message: "username is required"})
     @Length(4, 20, { message: "username must be at least $constraint1 and not longer than $constraint2 characters" })
-    @Unique(['username'])
     username: string
 
     @Column()
@@ -28,7 +27,6 @@ export default class User {
     email: string
 
     @Column()
-    @Length(6, 30, { message: "password must be at least $constraint1 and not longer than constraint2 characters" })
     @IsNotEmpty({ message: "password is required"})
     password: string
 

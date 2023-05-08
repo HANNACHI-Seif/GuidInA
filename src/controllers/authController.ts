@@ -6,30 +6,37 @@ import { Request, Response } from "express";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 import sendResetPasswordEmail from "../utilities/resetEmail";
-import sendConfirmationEmail from "../utilities/confirmation_email";
+import User from "../entities/user";
 
 
 
 let register_user = async (req: Request, res: Response) => {
     try {
-        let { username, password, email } = req.body
+        let { username, password, email }: { username: string, password: string, email: string } = req.body
+        if (password.length < 6) throw new Error("password short")
         //creating new user
         let newUser = await createUser(username, password, email)
-        //creating access&refresh token
-        //let refresh = await generateToken({ id: newUser.id }, process.env.REFRESH_TOKEN_SECRET!, '30d')
-        //let accessToken = await generateToken({ id: newUser.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-        //await createToken(refresh, newUser)
-
-        //send confirmation email
-        let email_confirmation_token = await generateToken({ id: newUser.id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
-        const link = `${process.env.BASE_URL}/user/confirmation/${email_confirmation_token}`
-        sendConfirmationEmail(email, username, link)
-        //response 
-        //res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-        res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })
+        if (!(newUser instanceof User)) {
+            res.json({ errors: newUser })
+        } else {
+            //send confirmation email
+            let email_confirmation_token = await generateToken({ id: (newUser as User).id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
+            const link = `${process.env.BASE_URL}/user/confirmation/${email_confirmation_token}`
+            //sendConfirmationEmail(email, username, link)
+            //response 
+            res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })    
+        }
     } catch (error) {
-        console.log(error.message)
-        res.json({ msg: "could not add user" })
+        const str: string = error.message
+        if (str.startsWith("ER_DUP_ENTRY")) {
+            res.json({ errors: [{ field: "email", errors: ["The email you entered is already registered. Please use a different email address."
+        ] }] })
+        } else if (str == "password short") {
+            res.json({ errors: [{ field: "password", errors: ["password too short!"] }] })
+        } else {
+            res.json({ msg: "could not add a user" })
+        }
+        
     }
 
 }

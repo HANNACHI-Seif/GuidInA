@@ -2,7 +2,7 @@ import express from 'express'
 import { authMiddleware } from '../utilities/token'
 import { adminCheck } from '../middleware/admin.middleware'
 import { addHotel, addHotelImage, deleteHotel, deleteHotelImage, editHotel } from '../controllers/hotelController'
-import handleFileUpload from '../utilities/img'
+import handleImageUpload from '../utilities/img'
 
 
 let router = express.Router()
@@ -11,7 +11,7 @@ let router = express.Router()
 
 router.post('/addHotel', authMiddleware, adminCheck, addHotel)
 
-router.post('/:id/addImage', authMiddleware, adminCheck, handleFileUpload, addHotelImage)
+router.post('/:id/addImage', authMiddleware, adminCheck, handleImageUpload, addHotelImage)
 
 router.delete('/:hotelId/image/:imageId', authMiddleware, adminCheck, deleteHotelImage)
 

@@ -6,6 +6,12 @@ import fs from 'fs'
 import  roles  from "../constants/roles"
 import Decimal from "decimal.js"
 import Role from "../entities/role"
+import { validate } from "class-validator"
+
+interface errors_type {
+    field: string,
+    errors: string[]
+}
 
 
 let createUser = async (username: string, password: string, email: string, Roles: roles[] = [roles.TOURIST]) => {
@@ -19,6 +25,19 @@ let createUser = async (username: string, password: string, email: string, Roles
     })
     newUser.rating = new Decimal(0.0);
     newUser.password = (await generateHash(password))!
+    //validation:
+    const error_response: errors_type[] =[]
+    const errors = await validate(newUser)
+    for (const error of errors) {
+        const field = error.property
+        const error_messages = Object.values(error.constraints!)
+        error_response.push({field: field, errors: error_messages})
+    }
+
+    if (error_response.length > 0) {
+        return error_response;
+    }
+
     let userRepo = appDataSource.getRepository(User)
     return await userRepo.save(newUser);
 }
