@@ -6,7 +6,7 @@ import fs from 'fs/promises'
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "example@gmail.com",
+      user: "your email here",
       pass: "your password here",
     },
   });
@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
     });
   
     const mailOptions = {
-      from: "shannachi2@gmail.com",
+      from: "your email here",
       to: email,
       subject: "Reset Your Password",
       html,
