@@ -16,7 +16,8 @@ let addUserReview = async (req: Request, res: Response) => {
                     .where('user_review.userId = :userId', { userId })
                         .andWhere('user_review.ratedUserId = :ratedUserId', { ratedUserId: req.params.id })
                             .getOne()
-        let isServiceProvider = user.roles.some(role => [roles.CAR_RENTOR, roles.GUIDE, roles.HOUSE_RENTOR, roles.TRANSLATOR].includes(role.roleName))
+        let special_roles = Object.values(roles).filter((role) => role !== roles.ADMIN && role !== roles.TOURIST);
+        let isServiceProvider = user.roles.some(role => special_roles.includes(role.roleName))
         if (!ratedUser || !isServiceProvider || reviewed || user.id == req.params.id ) throw new Error("something went wrong")
         let {text, stars}: {text: string, stars: number} = req.body
         if (stars > 5 || stars < 1) throw new Error("unvalid input")

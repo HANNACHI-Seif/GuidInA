@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, Length } from "class-validator"
-import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn, ManyToMany, JoinTable } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany, JoinColumn, ManyToMany, JoinTable, OneToOne } from "typeorm"
 import Post from './post'
 import Like from "./like"
 import RefreshToken from "./refreshToken"
@@ -8,6 +8,7 @@ import User_review from "./user_review"
 import  DecimalTransformer  from "../utilities/float._."
 import Decimal from "decimal.js"
 import Role from "./role"
+import Application_Form from "./application_form"
 
 
 @Entity()
@@ -61,6 +62,9 @@ export default class User {
 
     @OneToMany(() => User_review, review => review.ratedUser)
     myReviews: User_review[]
+
+    @OneToOne(() => Application_Form, form => form.user)
+    form: Application_Form
 
 
     
