@@ -84,7 +84,20 @@ let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: s
         let fetchedRole = await appDataSource.getRepository(Role).findOne({where: { roleName: role } })
         if (fetchedRole) userToEdit.roles.push(fetchedRole)
     } )
-    appDataSource.manager.save(userToEdit)
+    
+    const error_response: errors_type[] =[]
+    const errors = await validate(userToEdit)
+    for (const error of errors) {
+        const field = error.property
+        const error_messages = Object.values(error.constraints!)
+        error_response.push({field: field, errors: error_messages})
+    }
+
+    if (error_response.length > 0) {
+        return error_response;
+    }
+
+    return appDataSource.manager.save(userToEdit)
 }
 //newRole should be an array of roles string example : ["guide", "translator"]
 

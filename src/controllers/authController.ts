@@ -7,34 +7,40 @@ import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 import sendResetPasswordEmail from "../utilities/resetEmail";
 import User from "../entities/user";
+import errors from "../constants/errors";
 
 
 
 let register_user = async (req: Request, res: Response) => {
     try {
         let { username, password, email }: { username: string, password: string, email: string } = req.body
-        if (password.length < 6) throw new Error("password short")
+        if (password.length < 6) throw new Error(errors.SHORT_PASSWORD)
         //creating new user
         let newUser = await createUser(username, password, email)
         if (!(newUser instanceof User)) {
             res.json({ errors: newUser })
         } else {
+            let id = (newUser as User).id
             //send confirmation email
-            let email_confirmation_token = await generateToken({ id: (newUser as User).id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
+            let email_confirmation_token = await generateToken({ id: id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
             const link = `${process.env.BASE_URL}/user/confirmation/${email_confirmation_token}`
+            //tokens only for testing:
+            let refresh = await generateToken({ id: id }, process.env.REFRESH_TOKEN_SECRET!, '7d')
+            let accessToken = await generateToken({ id: id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            await createToken(refresh, (newUser as User))
             //sendConfirmationEmail(email, username, link)
             //response 
-            res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })    
+            //res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })  
+            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })  
         }
     } catch (error) {
         const str: string = error.message
         if (str.startsWith("ER_DUP_ENTRY")) {
-            res.json({ errors: [{ field: "email", errors: ["The email you entered is already registered. Please use a different email address."
-        ] }] })
-        } else if (str == "password short") {
-            res.json({ errors: [{ field: "password", errors: ["password too short!"] }] })
+            res.json({ errors: [{ field: "email", errors: [errors.EMAIL_ALREADY_REGISTERED] }] })
+        } else if (str == errors.SHORT_PASSWORD) {
+            res.json({ errors: [{ field: "password", errors: [errors.SHORT_PASSWORD] }] })
         } else {
-            res.json({ msg: "could not add a user" })
+            res.json({ error: errors.INTERNAL_SERVER_ERROR })
         }
         
     }
@@ -46,13 +52,12 @@ let confirmEmailGet = async (req: Request, res: Response) => {
         let token = req.params.token
         let { id }: { id: string }= jwt.verify(token, process.env.EMAIL_TOKEN_SECRET!) as { id: string }
         let user = await fetchUser(id)
-        if (!user) throw new Error("Unvalid token!")
+        if (!user) throw new Error(errors.INVALID_TOKEN)
         user.email_confirmed = true
         appDataSource.manager.save(user)
         res.json({ msg: "email confirmed" })
     } catch (error) {
-        console.log(error)
-        res.json({ msg: "failed to confirm token:(" })
+        res.json({ error: error.message })
     }
 }
 
@@ -60,35 +65,33 @@ let loginUser = async (req: Request, res: Response) => {
     try {
         let { username, password } = req.body
         let userByUsername = await fetchUserByusrn(username)
-        if (!userByUsername) throw new Error("uncorrect username or password!")
+        if (!userByUsername) throw new Error(errors.WRONG_CREDENTIALS)
         if (await bcrypt.compare(password, userByUsername!.password)) {
             //check if email confirmed
-            if (!userByUsername.email_confirmed) throw new Error("Please confirm your email")
+            if (!userByUsername.email_confirmed) throw new Error(errors.EMAIL_NOT_CONFIRMED)
             //creating access&refresh token
             let refresh = await generateToken({ id: userByUsername!.id }, process.env.REFRESH_TOKEN_SECRET!, '7d')
             let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             await createToken(refresh, userByUsername!)
             //response
             res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
-        } else throw new Error("uncorrect username or password!")
+        } else throw new Error(errors.WRONG_CREDENTIALS)
     } catch (error) {
-        console.log(error)
-        res.json({ msg: error.message })
+        res.json({ error: error.message })
     }
 }
 
 let logoutUser = async (req: Request, res: Response) => {
     try {
-        let refreshToken = req.cookies.jwt
-        if (!refreshToken) throw new Error("something went wrong")
+        let refreshToken: string = req.cookies.jwt
+        if (!refreshToken) throw new Error(errors.BAD_REQUEST_REFRESH_TOKEN_MISSING)
         let user = await fetchUser(req.user!.id, { tokens: true })
-        if ((user?.tokens.some((token) => token == refreshToken))) throw new Error("something went wrong") 
+        if ((user?.tokens.some((token) => token.token == refreshToken))) throw new Error(errors.UNAUTHORIZED_INVALID_TOKEN) 
         //deleting token from db
         await deleteToken(refreshToken)
         res.clearCookie('jwt').json({ msg: "logged out successfuly" })
     } catch (error) {
-        console.log(error)
-        res.json({ msg: "something went wrong" })
+        res.json({ error: error.message })
     }
 
 }
@@ -117,19 +120,18 @@ let userEditPassword = async (req: Request, res: Response) => {
             user.password = await generateHash(newPassword)
             await appDataSource.manager.save(user)
             res.json({ msg: "password updated successfuly" })
-        } else throw new Error("wrong old password")
+        } else throw new Error(errors.WRONG_OLD_PASSEORD)
     } catch (error) {
-        console.log(error)
-        res.json({ msg: "could not update password" })
+        res.json({ error: error.message })
     }
 }
 
 let forgotPassword = async (req: Request, res: Response) => {
     try {
         let { email }: { email: string } = req.body
-        if (!email) throw new Error("something went wrong")
+        if (!email) throw new Error(errors.EMAIL_NOT_PROVIDED)
         let user = await fetchUserByEmail(email)
-        if (!user) throw new Error("there is no user with this email")
+        if (!user) throw new Error(errors.USER_NOT_FOUND_WITH_EMAIL)
         let token = await generateToken({ id: user.id }, process.env.RESET_TOKEN_SECRET!, '5m')
         user.resetToken = token
         appDataSource.manager.save(user)
@@ -137,7 +139,6 @@ let forgotPassword = async (req: Request, res: Response) => {
         await sendResetPasswordEmail(email, user.username, link)
         res.json({ msg: "check your email inbox!" })
     } catch (error) {
-        console.log(error);
         res.json({ msg: error.message })
     }
 }
@@ -146,10 +147,9 @@ let resetPasswordGet = async (req: Request, res: Response) => {
     try {
         let token = req.params.token
         let user = await authToken(token, process.env.RESET_TOKEN_SECRET!)
-        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error("invalid link or expired")
-        res.json({ msg: "all good" })
+        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error(errors.UNAUTHORIZED_INVALID_TOKEN)
+        res.json({ msg: "Please insert a new password" })
     } catch (error) {
-        console.log(error)
         res.json({ msg: error.message })
     }
 }
@@ -159,13 +159,13 @@ let resetPasswordPost = async (req: Request, res: Response) => {
         let { password }: { password: string } = req.body
         let token = req.params.token
         let user = await authToken(token, process.env.RESET_TOKEN_SECRET!)
-        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error("invalid link or expired")
+        if (!user || user.id !== req.params.userId || user.resetToken !== token) throw new Error(errors.UNAUTHORIZED_INVALID_TOKEN)
+        if (password.length < 6) throw new Error(errors.SHORT_PASSWORD)
         user.password = await generateHash(password)
         user.resetToken = '';
         appDataSource.manager.save(user)
         res.json({msg: "password reset successfuly"})
     } catch (error) {
-        console.log(error)
         res.json(error.message)
     }
 }
