@@ -1,6 +1,7 @@
 import { Length } from "class-validator";
-import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import Language from "./language";
+import User from "./user";
 
 
 @Entity()
@@ -28,6 +29,10 @@ export default class Special_User_Profile {
     @ManyToMany(() => Language)
     @JoinTable()
     languages: Language[]
+
+    @OneToOne(() => User, user => user.profile, { onDelete: "CASCADE" })
+    user: User
+    
 
 
 

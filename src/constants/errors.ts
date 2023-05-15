@@ -11,7 +11,8 @@ enum errors {
     EMAIL_NOT_PROVIDED = "Please provide your email.",
     USER_NOT_FOUND_WITH_EMAIL = "User not found with this email.",
     UNAUTHORIZED = "Unauthorized, only admin can perform this action.",
-    USER_NOT_FOUND ="User not found"
+    USER_NOT_FOUND ="User not found",
+    RESOURCE_NOT_FOUND = "Resource not found"
 }
 
 export default errors

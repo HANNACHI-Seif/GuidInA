@@ -1,3 +1,4 @@
+import languages from "../constants/languages";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 
@@ -8,6 +9,6 @@ export default class Language {
     id: number
 
     @Column()
-    name: string
+    name: languages
 
 }

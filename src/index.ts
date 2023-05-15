@@ -3,7 +3,7 @@ import express, { Request, Response } from "express";
 import appDataSource from "./ormconfig"
 import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
-config();
+
 
 //routes imports
 import authRoutes from './routes/authRoutes'
@@ -16,6 +16,7 @@ import restaurantRoutes from './routes/restaurantRoutes'
 import destReviewRoutes from './routes/destReviewRoutes'
 import hotelReviewRoutes from './routes/hotelReviewRoutes'
 import restReviewRoutes from './routes/restReviewRoutes'
+import roleApplicationRoutes from './routes/roleApplicationRoutes'
 
 //test imports
 import Destination from "./entities/destination";
@@ -29,7 +30,11 @@ import Like from "./entities/like"
 import User from "./entities/user";
 import Role from "./entities/role";
 import roles from "./constants/roles";
-import { fetchUserByusrn } from "./middleware/user.middleware";
+import Language from "./entities/language";
+import Languages from "./constants/languages";
+import { generateHash } from "./utilities/hash";
+import { generateToken } from "./utilities/token";
+import Decimal from "decimal.js";
 
 declare global {
     namespace Express {
@@ -46,6 +51,7 @@ declare global {
     await appDataSource.initialize()
     
     const app = express()
+    config();
 
     //midddleware
     app.use(express.json())
@@ -54,8 +60,9 @@ declare global {
     app.listen(process.env.PORT, () => console.log("listening..."))
 
     //testing routes:
-    app.post('/create_roles', async (req: Request, res: Response) => { //this function is used to create roles in the database
+    app.post('/TEST',async (req:Request, res: Response) => {
         try {
+            //roles
             let tourist = new Role()
             tourist.roleName = roles.TOURIST
             let admin = new Role()
@@ -69,12 +76,50 @@ declare global {
             let translator = new Role()
             translator.roleName = roles.TRANSLATOR
             await appDataSource.manager.save([tourist, admin, translator, guide, carRenter, houseRenter])
-            res.json({ msg: "roles created!" })
+            //languages:
+            let english = new Language()
+            english.name = Languages.ENGLISH
+            let french = new Language()
+            french.name = Languages.FRENCH
+            let kabyle = new Language()
+            kabyle.name = Languages.KABYLE
+            let arabic = new Language()
+            arabic.name = Languages.ARABIC
+            await appDataSource.manager.save([english, french, kabyle, arabic])
+            //admin
+            let admin_user = new User()
+            admin_user.email = "admin@gmail.com"
+            admin_user.password = await generateHash("rootroot")
+            admin_user.roles = [(await appDataSource.getRepository(Role).findOne({ where: { roleName: roles.ADMIN } }))!]
+            admin_user.username = "admin"
+            admin_user.rating = new Decimal(0)
+            //dummy user
+            let dummy = new User()
+            dummy.email = "dummy@gmail.com"
+            dummy.password = await generateHash("coolpassword")
+            dummy.roles = [(await appDataSource.getRepository(Role).findOne({ where: { roleName: roles.TOURIST } }))!]
+            dummy.username = "dummy"
+            dummy.rating = new Decimal(0)
+            //preparing response
+            let admin_result = await appDataSource.manager.save(admin_user)
+            let dummy_result = await appDataSource.manager.save(dummy)
+            let admin_access_token = await generateToken({ id: admin_result.id }, process.env.ACCESS_TOKEN_SECRET!, "30d")
+            let dummy_access_token = await generateToken({ id: dummy_result.id }, process.env.ACCESS_TOKEN_SECRET!, "30d")
+            let res_roles = await appDataSource.getRepository(Role).find()
+            let res_languages = await appDataSource.getRepository(Language).find()
+            //response
+            res.json({
+                admin_access_token,
+                dummy_access_token,
+                res_roles,
+                res_languages
+            })
         } catch (error) {
-            console.log(error)
             res.json({ msg: "failed" })
+            console.log(error)
         }
     })
+
 
     app.get('/roles', async (req: Request, res: Response) => {
         try {
@@ -86,30 +131,13 @@ declare global {
         }
     })
 
-    app.post('/make_admin', async (req: Request, res: Response) => { //this function is used to modify a user to admin just for testing :p
-        try {
-            let { username } = req.body
-            let user = await appDataSource.getRepository(User).findOne({ where: { username: username }, relations: { roles: true } })
-            let admin = await appDataSource.getRepository(Role).findOne({ where: { roleName: roles.ADMIN } })
-            user?.roles.push(admin!)
-            await appDataSource.manager.save(user)
-            res.json({ msg: "this user is now admin" })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: error.message })
-        }
-    })
-
     app.get('/allUsers', async (req: Request, res: Response) => {
         try {
             let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: { 
-                likes: true, 
-                comments: true, 
-                tokens: true, 
-                posts: true, 
-                myReviews: true,
-                roles: true 
+            let users = await userRepo.find({ relations: {
+                roles: true,
+                tokens: true,
+                profile: true
             } })
             res.json({users})
         } catch (err) {
@@ -237,6 +265,9 @@ declare global {
 
     //restaurant review routes
     app.use('/restaurant-reviews', restReviewRoutes)
+
+    //special role application
+    app.use('/special_role', roleApplicationRoutes)
 
 
     //TODO: car posts / house posts

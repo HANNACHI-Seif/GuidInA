@@ -1,7 +1,7 @@
 import express from 'express'
 import { addDestImage, addDestination, deleteDest, deleteDestImage, editDest } from '../controllers/destController'
 import { authMiddleware } from '../utilities/token'
-import handleImageUpload from '../utilities/img'
+import handleImageUpload from '../utilities/imageUploadHandler'
 import { adminCheck } from '../middleware/admin.middleware'
 
 

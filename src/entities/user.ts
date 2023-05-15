@@ -9,6 +9,7 @@ import  DecimalTransformer  from "../utilities/float._."
 import Decimal from "decimal.js"
 import Role from "./role"
 import Application_Form from "./application_form"
+import Special_User_Profile from "./special_user_profile"
 
 
 @Entity()
@@ -43,6 +44,10 @@ export default class User {
 
     @Column({ default: '' })
     resetToken: string
+
+    @OneToOne(() => Special_User_Profile, profile => profile.user, { cascade: true })
+    @JoinColumn()
+    profile: Special_User_Profile
 
     @OneToMany( () => Post, post => post.user, { cascade: true })
     @JoinColumn()

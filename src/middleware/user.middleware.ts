@@ -107,5 +107,6 @@ export {
     fetchUserByusrn,
     fetchUserByEmail,
     deleteUser,
-    AdminEditUser
+    AdminEditUser,
+    errors_type
 }

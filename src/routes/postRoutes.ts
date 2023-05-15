@@ -1,6 +1,6 @@
 import express from 'express'
 import { authMiddleware } from '../utilities/token'
-import handleImageUpload from "../utilities/img";
+import handleImageUpload from "../utilities/imageUploadHandler";
 import { addPost, commentOnPost, delete_Comment, delete_Post, fetchAllComments, fetchAllLikes, fetchAllPosts, likePost } from '../controllers/postController';
 
 

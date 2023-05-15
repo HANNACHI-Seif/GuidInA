@@ -1,6 +1,6 @@
 import express from 'express'
 import { authMiddleware } from '../utilities/token'
-import handleImageUpload from '../utilities/img'
+import handleImageUpload from '../utilities/imageUploadHandler'
 import { adminCheck } from '../middleware/admin.middleware'
 import { addRestaurant, addRestaurantImage, deleteRestaurantImage, deleteRestaurant, editRestaurant } from '../controllers/restaurantController'
 

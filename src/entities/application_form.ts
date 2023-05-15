@@ -3,10 +3,8 @@ import User from "./user"
 import Role from "./role"
 import { IsNotEmpty, Length, Validate } from "class-validator"
 import Language from "./language"
+import IsAlgerianPhoneNumber from "../utilities/validators/isAlgerianPhoneNumber"
 
-function isAlgerianPhoneNumber(value: string): boolean {
-    return /^\+213\d{9}$/.test(value);
-}
 
 @Entity()
 export default class Application_Form {
@@ -20,12 +18,13 @@ export default class Application_Form {
     
     @IsNotEmpty()
     @Column()
-    @Validate(isAlgerianPhoneNumber, { message: "Unvalid phone number, please use an algerian phone number" })
+    @Length(13,13, {message: "Uncorrect length" })
+    @Validate(IsAlgerianPhoneNumber, { message: "Unvalid phone number, please use an algerian phone number" })
     phoneNumber: string
 
     @IsNotEmpty()
     @Column()
-    @Length(4, 20, { message: 'Last name must be between 4 and 20 characters' })
+    @Length(4, 20, { message: 'First name must be between 4 and 20 characters' })
     firstName: string;
 
     @IsNotEmpty()
@@ -33,7 +32,7 @@ export default class Application_Form {
     @Length(4, 20, { message: 'Last name must be between 4 and 20 characters' })
     lastName: string;
 
-    @IsNotEmpty()
+    @IsNotEmpty()   
     @Column()
     city: string;
 
