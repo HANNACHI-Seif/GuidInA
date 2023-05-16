@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, ManyToMany, PrimaryGeneratedColumn, JoinTable, OneToOne } from "typeorm"
+import { Column, Entity, ManyToOne, ManyToMany, PrimaryGeneratedColumn, JoinTable, OneToOne, JoinColumn } from "typeorm"
 import User from "./user"
 import Role from "./role"
 import { IsNotEmpty, Length, Validate } from "class-validator"
@@ -12,8 +12,8 @@ export default class Application_Form {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @IsNotEmpty()
     @OneToOne(() => Role)
+    @JoinColumn()
     role: Role
     
     @IsNotEmpty()

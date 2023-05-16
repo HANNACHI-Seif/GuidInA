@@ -5,6 +5,7 @@ import roles from "../constants/roles";
 import Languages from "../constants/languages";
 import errors from "../constants/errors";
 import appDataSource from "../ormconfig"
+import Role from "../entities/role";
 
 
 
@@ -28,8 +29,11 @@ let createApplicationForm = async( req:Request, res: Response) => {
             }
         }
     } catch (error){
-        console.log(error)
-        res.json({ msg: "could not add form" })
+        if (error.code == "ER_DUP_ENTRY" ) {
+            res.json({ msg: "You have already applied. Please wait for a response before applying again." })
+        } else {
+            res.json({ msg: "Unexpected error occured, could not apply" })
+        }
    }
 
 }
@@ -64,7 +68,7 @@ let adminDeclineApplication = async (req: Request, res: Response) => {
 
 let fetchAllAppplications = async (req: Request, res: Response) => {
     try {
-        let applications = await appDataSource.getRepository(Application_Form).find()
+        let applications = await appDataSource.getRepository(Application_Form).find({ relations: { languages: true, role: true } })
         res.json({ applications })
     } catch (error) {
         console.log(error)

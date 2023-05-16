@@ -9,26 +9,19 @@ import Languages from "../constants/languages"
 import User from "../entities/user"
 import Special_User_Profile from "../entities/special_user_profile"
 import fs from "fs"
+import { userEditPassword } from "src/controllers/authController"
 
 
 
 let createForm =  async (url:string, firstName: string, lastName:string, city:string, phoneNumber: string, role: roles, languages: Languages[], user: User) => {
-    let db_role = await appDataSource.getRepository(Role).findOne({ where: { roleName: role } })
     let newForm = new Application_Form()
         newForm.firstName = firstName
         newForm.lastName = lastName
         newForm.city = city
-        newForm.phoneNumber = phoneNumber
-        newForm.role = db_role! 
+        newForm.phoneNumber = phoneNumber 
         newForm.cv_file_url = url
         newForm.languages = []
-
-        let language_repo = appDataSource.getRepository(Language)
-        for (let i of languages) {
-            let db_lang = await language_repo.findOne({ where: { name: i } })
-            newForm.languages.push(db_lang!)
-        }
-
+        newForm.user = user
         //validation:
         const error_response: errors_type[] =[]
         if (role == roles.ADMIN || role == roles.TOURIST) {
@@ -40,17 +33,22 @@ let createForm =  async (url:string, firstName: string, lastName:string, city:st
             const error_messages = Object.values(error.constraints!)
             error_response.push({field: field, errors: error_messages})
         }
-
         if (error_response.length > 0) {
             return error_response;
         }
-
-        newForm.user = user
+        //establishing relations
         let result = await appDataSource.manager.insert(Application_Form, newForm)
         let formID: string = result.identifiers[0].id
-        let saved_form = await appDataSource.getRepository(Application_Form).findOne({ where: { id: formID } })
-        return saved_form
-
+        let saved_form = await appDataSource.getRepository(Application_Form).findOne({ where: { id: formID }, relations: { languages: true, role: true } })
+        let language_repo = appDataSource.getRepository(Language)
+        saved_form!.languages = []
+        for (let i of languages) {
+            let db_lang = await language_repo.findOne({ where: { name: i } })
+            saved_form!.languages.push(db_lang!)
+        }
+        let db_role = await appDataSource.getRepository(Role).findOne({ where: { roleName: role } })
+        saved_form!.role = db_role!
+        return await appDataSource.manager.save(saved_form)
 }
 
 
@@ -64,6 +62,11 @@ let createSpecialUserProfile = async (application: Application_Form) => {
     new_special_user_profile.phonenumber = application?.phoneNumber!
     new_special_user_profile.user = application.user!
     await appDataSource.manager.save(new_special_user_profile)
+    let user = await appDataSource.manager.getRepository(User).findOne({ where: { id: application.user.id }, relations: { roles: true } })
+    let db_role = await appDataSource.manager.getRepository(Role).findOne({ where: { id: application.role.id } })
+    user?.roles.push(db_role!)
+    await appDataSource.manager.save(user)
+
 }
 
 let deleteApplication = async (application: Application_Form) => {
@@ -74,7 +77,8 @@ let deleteApplication = async (application: Application_Form) => {
 }
 
 let fetchApplication = async (id: string) => {
-    return await appDataSource.getRepository(Application_Form).findOne({ where: { id: id }, relations: { user: true, languages: true } })
+    let result =  await appDataSource.getRepository(Application_Form).findOne({ where: { id: id }, relations: { user: true, languages: true, role: true } })
+    return result
 }
 
 export { 

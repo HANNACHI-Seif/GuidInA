@@ -18,6 +18,10 @@ import Role from './entities/role'
 import Application_Form from './entities/application_form'
 import Language from './entities/language'
 import Special_User_Profile from './entities/special_user_profile'
+import House_Post from './entities/house_post'
+import Car_Post from './entities/car_post'
+import Car_Image from './entities/car_image'
+import House_Image from './entities/house_image'
 
 export default new DataSource({
     type: "mysql",
@@ -32,7 +36,8 @@ export default new DataSource({
         Destination , Dest_Image, Dest_Review,
         Restaurant, Rest_Image, Rest_Review,
         Hotel, Hotel_Image, Hotel_Review,
-        Application_Form, Language, Special_User_Profile ],
+        Application_Form, Language, Special_User_Profile,
+        House_Post, Car_Post, Car_Image, House_Image ],
     subscribers: [],
     migrations: [], 
 })

@@ -120,7 +120,6 @@ declare global {
         }
     })
 
-
     app.get('/roles', async (req: Request, res: Response) => {
         try {
             let roles = await appDataSource.getRepository(Role).find()
@@ -137,7 +136,8 @@ declare global {
             let users = await userRepo.find({ relations: {
                 roles: true,
                 tokens: true,
-                profile: true
+                profile: true,
+                form: true
             } })
             res.json({users})
         } catch (err) {
@@ -229,11 +229,6 @@ declare global {
         }
     })
 
- 
-
-
-
-
     //routes
     //auth routes
     app.use('/user', authRoutes)
@@ -270,8 +265,7 @@ declare global {
     app.use('/special_role', roleApplicationRoutes)
 
 
-    //TODO: car posts / house posts
-    //TODO: role application form
+    //TODO: VALIDATION
     
     
 

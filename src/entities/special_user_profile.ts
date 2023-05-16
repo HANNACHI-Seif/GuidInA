@@ -1,7 +1,9 @@
 import { Length } from "class-validator";
-import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToOne } from "typeorm";
+import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToOne, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import Language from "./language";
 import User from "./user";
+import House_Post from "./house_post";
+import Car_Post from "./car_post";
 
 
 @Entity()
@@ -32,8 +34,14 @@ export default class Special_User_Profile {
 
     @OneToOne(() => User, user => user.profile, { onDelete: "CASCADE" })
     user: User
-    
 
+    @OneToMany(() => House_Post, house_post => house_post.profile)
+    @JoinColumn()
+    house_posts: House_Post[]
+    
+    @OneToMany(() => Car_Post, car_post => car_post.profile)
+    @JoinColumn()
+    car_posts: Car_Post[]
 
 
 }
