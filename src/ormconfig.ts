@@ -28,7 +28,7 @@ export default new DataSource({
     host: "localhost",
     port: 3306,
     username: "seifon",
-    password: "",
+    password: "coolpass",
     database: "guidina",
     synchronize: true,
     logging: false,

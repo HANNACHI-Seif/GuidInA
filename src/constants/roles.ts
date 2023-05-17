@@ -2,8 +2,8 @@
     TOURIST = "tourist",
     GUIDE = "guide",
     TRANSLATOR = "translator",
-    CAR_RENTOR = "car rentor",
-    HOUSE_RENTOR = "house rentor",
+    CAR_RENTER = "car renter",
+    HOUSE_RENTER = "house renter",
     ADMIN = "admin"
 }
 

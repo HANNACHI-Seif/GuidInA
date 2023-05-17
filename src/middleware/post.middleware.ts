@@ -3,7 +3,6 @@ import Post from "../entities/post"
 import Like from "../entities/like"
 import Comment from "../entities/comment"
 import appDataSource from '../ormconfig'
-import { fetchUser } from "./user.middleware"
 
 
 let savePost = (caption: string, imageUrl: string = '', user: User) => {

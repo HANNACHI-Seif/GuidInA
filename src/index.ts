@@ -17,6 +17,7 @@ import destReviewRoutes from './routes/destReviewRoutes'
 import hotelReviewRoutes from './routes/hotelReviewRoutes'
 import restReviewRoutes from './routes/restReviewRoutes'
 import roleApplicationRoutes from './routes/roleApplicationRoutes'
+import carPostRoutes from './routes/carPostRoutes'
 
 //test imports
 import Destination from "./entities/destination";
@@ -35,6 +36,8 @@ import Languages from "./constants/languages";
 import { generateHash } from "./utilities/hash";
 import { generateToken } from "./utilities/token";
 import Decimal from "decimal.js";
+import Special_User_Profile from "./entities/special_user_profile";
+import Car_Post from "./entities/car_post";
 
 declare global {
     namespace Express {
@@ -70,9 +73,9 @@ declare global {
             let guide = new Role()
             guide.roleName = roles.GUIDE
             let carRenter = new Role()
-            carRenter.roleName = roles.CAR_RENTOR
+            carRenter.roleName = roles.CAR_RENTER
             let houseRenter = new Role()
-            houseRenter.roleName = roles.HOUSE_RENTOR
+            houseRenter.roleName = roles.HOUSE_RENTER
             let translator = new Role()
             translator.roleName = roles.TRANSLATOR
             await appDataSource.manager.save([tourist, admin, translator, guide, carRenter, houseRenter])
@@ -229,6 +232,27 @@ declare global {
         }
     })
 
+    app.get('/profiles', async (req: Request, res: Response) => {
+        try {
+            let profiles = await appDataSource.getRepository(Special_User_Profile).find({ relations: { user: true, car_posts: true } })
+            res.json({ profiles })
+        } catch (error) {
+            console.log(error)
+            res.json({ error })
+        }
+    })
+
+    app.get('/allCarPosts', async (req: Request, res: Response) => {
+        try {
+            let car_posts = await appDataSource.getRepository(Car_Post).find({ relations: { profile: true } })
+            res.json({ car_posts })
+        } catch (error) {
+            console.log(error)
+            res.json({ msg: "could not fetch" })
+        }
+    })
+
+
     //routes
     //auth routes
     app.use('/user', authRoutes)
@@ -264,12 +288,10 @@ declare global {
     //special role application
     app.use('/special_role', roleApplicationRoutes)
 
+    app.use('/car_posts', carPostRoutes)
+
 
     //TODO: VALIDATION
     
-    
-
-
-
 
 })()
