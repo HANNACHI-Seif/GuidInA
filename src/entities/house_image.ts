@@ -11,7 +11,7 @@ export default class House_Image {
     @Column()
     url: string
 
-    @ManyToOne(() => House_Post, house_post => house_post.images)
+    @ManyToOne(() => House_Post, house_post => house_post.images, { onDelete: "CASCADE" })
     car_post: House_Post
 
 }

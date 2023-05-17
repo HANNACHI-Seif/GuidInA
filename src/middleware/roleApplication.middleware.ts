@@ -61,10 +61,11 @@ let createSpecialUserProfile = async (application: Application_Form) => {
     new_special_user_profile.lastName = application?.lastName!
     new_special_user_profile.phonenumber = application?.phoneNumber!
     new_special_user_profile.user = application.user!
-    await appDataSource.manager.save(new_special_user_profile)
+    let result = await appDataSource.manager.save(new_special_user_profile)
     let user = await appDataSource.manager.getRepository(User).findOne({ where: { id: application.user.id }, relations: { roles: true } })
     let db_role = await appDataSource.manager.getRepository(Role).findOne({ where: { id: application.role.id } })
     user?.roles.push(db_role!)
+    user!.profile = result
     await appDataSource.manager.save(user)
 
 }

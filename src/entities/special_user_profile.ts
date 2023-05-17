@@ -33,6 +33,7 @@ export default class Special_User_Profile {
     languages: Language[]
 
     @OneToOne(() => User, user => user.profile, { onDelete: "CASCADE" })
+    @JoinColumn()
     user: User
 
     @OneToMany(() => House_Post, house_post => house_post.profile)

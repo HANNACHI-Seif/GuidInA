@@ -24,12 +24,15 @@ export default class House_Post {
     rent_by: houseRentPeriod
 
     @Column()
+    price: number
+
+    @Column()
     isAvailable: boolean
 
     @ManyToOne(() => Special_User_Profile, profile => profile.house_posts)
     profile: Special_User_Profile
 
-    @OneToMany(() => House_Image, house_image => house_image.car_post)
+    @OneToMany(() => House_Image, house_image => house_image.car_post, { cascade: true })
     images: House_Image[]
 
 }
