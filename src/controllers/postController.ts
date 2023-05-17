@@ -15,8 +15,8 @@ let addPost = async (req: Request, res: Response) => {
     try {
         let { caption } = req.body
         let user = req.user!
-        let imageUrl = req.file?.path
-        await savePost(caption, imageUrl, user)
+        let images = req.files
+        await savePost(caption, (images as Express.Multer.File[]), user)
         res.json({ msg: "post added successfuly" })
     } catch (error) {
         console.log(error)
@@ -27,14 +27,16 @@ let addPost = async (req: Request, res: Response) => {
 let delete_Post = async (req: Request, res: Response) => {
     try {
         let user: User = req.user!
-        let postToDelete = await fetchPost(req.params.id, { user: true }) 
+        let postToDelete = await fetchPost(req.params.id, { user: true, images: true }) 
         if (!postToDelete) throw new Error("post not found!")
         let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
         if ((postToDelete.user.id !== user.id) && (!isAdmin)) throw new Error("Unauthorized")
         //delete
         appDataSource.manager.remove(postToDelete)
-        if (fs.existsSync(postToDelete.imageUrl)) {
-            fs.unlinkSync(postToDelete.imageUrl);
+        for (let i of postToDelete.images) {
+            if (fs.existsSync(i.url)) {
+                fs.unlinkSync(i.url);
+            }
         }
         res.json({ msg: "post deleted" })
     } catch (error) {

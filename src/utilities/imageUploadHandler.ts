@@ -21,7 +21,7 @@ let fileFilter = (req : any, file: Express.Multer.File, cb: FileFilterCallback) 
 }
 
 let limits = {
-    fileSize: 1024 * 1024 * 10 //10 MB
+    fileSize: 1024 * 1024 * 10, //10 MB
 }
 
 let upload = multer({
@@ -31,7 +31,7 @@ let upload = multer({
 })
 
 const handleImageUpload = (req: any, res: any, next: NextFunction) => {
-    upload.single('image')(req, res, (err) => {
+    upload.array('images', 6)(req, res, (err) => {
       if (err instanceof MulterError) {
         // Multer error occurred
         console.log(err.code, err.message)

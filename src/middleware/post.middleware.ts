@@ -3,16 +3,24 @@ import Post from "../entities/post"
 import Like from "../entities/like"
 import Comment from "../entities/comment"
 import appDataSource from '../ormconfig'
+import Post_Image from "../entities/post_image"
 
 
-let savePost = (caption: string, imageUrl: string = '', user: User) => {
+let savePost = async (caption: string, images: Express.Multer.File[] = [], user: User) => {
     let newPost = new Post()
     newPost.caption = caption
-    newPost.imageUrl = imageUrl
     newPost.user = user
     newPost.likes = []
     newPost.comments = []
-    return appDataSource.manager.save(newPost)
+    const result = await appDataSource.manager.save(newPost)
+    if (images.length == 0) return result
+    for (let i of images) {
+        let newImage = new Post_Image()
+        newImage.post = result
+        newImage.url = i.path
+        await appDataSource.manager.save(newImage)
+    }
+    return result;
 }
 
 let fetchPost = (id: string, obj = {}) => {

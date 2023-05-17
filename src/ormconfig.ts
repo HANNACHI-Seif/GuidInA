@@ -22,6 +22,7 @@ import House_Post from './entities/house_post'
 import Car_Post from './entities/car_post'
 import Car_Image from './entities/car_image'
 import House_Image from './entities/house_image'
+import Post_Image from './entities/post_image'
 
 export default new DataSource({
     type: "mysql",
@@ -32,7 +33,7 @@ export default new DataSource({
     database: "guidina",
     synchronize: true,
     logging: false,
-    entities: [User, Post, Comment, Like, RefreshToken, User_review, Role,
+    entities: [User, Post, Comment, Like, Post_Image, RefreshToken, User_review, Role,
         Destination , Dest_Image, Dest_Review,
         Restaurant, Rest_Image, Rest_Review,
         Hotel, Hotel_Image, Hotel_Review,

@@ -63,11 +63,16 @@ let deleteUser = async (id: string) => {
     try {
         let userRepo = appDataSource.getRepository(User)
         let postRepo = appDataSource.getRepository(Post)
-        let userToDelete = await userRepo.findOne({ where: { id: id }, relations: { posts: true } })
-        if (userToDelete!.posts) userToDelete?.posts.forEach((post) => {
-            postRepo.delete({ id: id })
-            if (fs.existsSync(post.imageUrl)) {
-                fs.unlinkSync(post.imageUrl);
+        let postsToDelete = await postRepo.createQueryBuilder('post')
+        .leftJoinAndSelect('post.images', 'post_image')
+            .where('post.userId = :userId', { userId: id })
+                .getMany()
+        if (postsToDelete) postsToDelete.forEach((post) => {
+            postRepo.delete({ id: post.id })
+            for (let i of post.images) {
+                if (fs.existsSync(i.url)) {
+                    fs.unlinkSync(i.url);
+                }
             }
         })
         userRepo.delete({ id: id })
@@ -99,7 +104,6 @@ let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: s
 
     return appDataSource.manager.save(userToEdit)
 }
-//newRole should be an array of roles string example : ["guide", "translator"]
 
 export {
     createUser, 

@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColum
 import User from "./user"
 import Like from "./like"
 import Comment from './comment'
+import Post_Image from "./post_image"
 
 
 @Entity()
@@ -12,8 +13,9 @@ export default class Post {
     @Column()
     caption: string
 
-    @Column({ default: "" })
-    imageUrl: string   
+    @OneToMany(() => Post_Image, post_image => post_image.post, { cascade: true }) 
+    @JoinColumn() 
+    images: Post_Image[]
 
     @ManyToOne(() => User, user => user.posts, { onDelete: "CASCADE" })
     user: User
