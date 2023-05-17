@@ -101,7 +101,6 @@ let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: s
     if (error_response.length > 0) {
         return error_response;
     }
-
     return appDataSource.manager.save(userToEdit)
 }
 

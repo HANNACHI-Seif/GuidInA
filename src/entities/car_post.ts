@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeRemove, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import Special_User_Profile from "./special_user_profile";
 import Car_Image from "./car_image";
 import carSeats from "../constants/carSeats";
@@ -30,5 +30,19 @@ export default class Car_Post {
 
     @OneToMany(() => Car_Image, car_image => car_image.car_post, { cascade: true })
     images: Car_Image[]
+
+    @BeforeRemove()
+    removeImagesAndFiles() {
+        // Delete associated Post_Image entities and their files
+        for (const image of this.images) {
+          image.removeImage();
+        }
+    }
+
+    remove(): void {
+        this.removeImagesAndFiles()
+    }
+
+    
 
 }

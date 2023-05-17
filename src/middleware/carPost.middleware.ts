@@ -1,15 +1,14 @@
-import roles from "../constants/roles"
 import carSeats from "../constants/carSeats"
 import Car_Post from "../entities/car_post"
 import appDataSource from '../ormconfig'
-import Role from "../entities/role"
 import User from "../entities/user"
 import Special_User_Profile from "../entities/special_user_profile"
+import Car_Image from "../entities/car_image"
 
 
 
 
-let createCarPostMiddleware = async (description: string, seats: carSeats, price: number, car_name: string, user: User) => {
+let createCarPostMiddleware = async ( images:Express.Multer.File[], description: string, seats: carSeats, price: number, car_name: string, user: User) => {
     let newCarPost = new Car_Post()
     newCarPost.description = description
     newCarPost.seats = seats
@@ -23,7 +22,14 @@ let createCarPostMiddleware = async (description: string, seats: carSeats, price
             .where('special_user_profile.userId = :userId', { userId: user.id })
                     .getOne()
     newCarPost.profile = user_profile!
-    return await appDataSource.getRepository(Car_Post).save(newCarPost)
+    let result = await appDataSource.getRepository(Car_Post).save(newCarPost)
+    for (let i of images) {
+        let newImage = new Car_Image()
+        newImage.car_post = result
+        newImage.url = i.path
+        await appDataSource.manager.save(newImage)
+    }
+    return result
 }
 
 let fetchCarPost = async (id: string) => {
@@ -38,8 +44,16 @@ let fetchProfile = async (userID: string) => {
                 .getOne() 
 }
 
-let deleteCarpostMiddleware = async (id: string) => {
-    await appDataSource.getRepository(Car_Post).delete({ id: id })
+let deleteCarpostMiddleware = async (carPost: Car_Post) => {
+    await appDataSource.getRepository(Car_Post).remove(carPost)
+}
+
+let editCarPostMiddleware = async ( carPost: Car_Post, description: string, car_name: string, seats: carSeats, price: number) => {
+    if ( description ) carPost.description = description
+    if ( car_name ) carPost.car_name = car_name
+    if ( seats ) carPost.seats = seats
+    if ( price ) carPost.price = price
+    return await appDataSource.manager.save(carPost)
 }
 
 
@@ -47,6 +61,7 @@ export {
     createCarPostMiddleware,
     fetchCarPost,
     fetchProfile,
-    deleteCarpostMiddleware
+    deleteCarpostMiddleware,
+    editCarPostMiddleware
 
 }
