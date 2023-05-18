@@ -30,7 +30,7 @@ let changeCarState = async (req: Request, res: Response) => {
         if (!carPost) throw new Error(errors.RESOURCE_NOT_FOUND)
         if (carPost.isAvailable) carPost.isAvailable = false
         else carPost.isAvailable = true
-        appDataSource.manager.save(carPost)
+        await appDataSource.manager.save(carPost)
         res.json({ msg: "state changed" })
     } catch (error) {
         console.log(error.message)
@@ -45,7 +45,7 @@ let deleteCarPost = async (req: Request, res: Response) => {
         let isCarRenter = user.roles.some((role) => role.roleName == roles.CAR_RENTER)
         let isAdmin = user.roles.some((role) => role.roleName == roles.ADMIN)
         if (!isCarRenter && !isAdmin) throw new Error(errors.UNAUTHORIZED_CAR_RENTERS_ONLY)
-        let profile = await fetchProfile(req.user?.id!)
+        let profile = await fetchProfile(user.id!)
         if (!profile) {
             return res.json({ error: errors.UNAUTHORIZED_CAR_RENTERS_ONLY })
         } 

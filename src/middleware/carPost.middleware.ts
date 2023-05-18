@@ -13,7 +13,6 @@ let createCarPostMiddleware = async ( images:Express.Multer.File[], description:
     newCarPost.description = description
     newCarPost.seats = seats
     newCarPost.price = price
-    newCarPost.isAvailable = true
     newCarPost.car_name = car_name
 
     let user_profile = await appDataSource
@@ -57,11 +56,13 @@ let editCarPostMiddleware = async ( carPost: Car_Post, description: string, car_
 }
 
 
+
+
 export {
     createCarPostMiddleware,
     fetchCarPost,
     fetchProfile,
     deleteCarpostMiddleware,
-    editCarPostMiddleware
+    editCarPostMiddleware,
 
 }
