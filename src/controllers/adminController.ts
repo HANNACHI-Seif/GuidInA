@@ -8,7 +8,6 @@ import roles from "../constants/roles";
 let adminAddUser = async (req: Request, res: Response) => {
     try {
         let { username, password, email, role }: { username: string, password: string, email: string, role: roles[] } = req.body
-        let user = req.user!
         let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
         if (!isAdmin) throw new Error("Unauthorized")
         //add user
@@ -23,7 +22,6 @@ let adminAddUser = async (req: Request, res: Response) => {
 
 let adminDeleteUser = async (req: Request, res: Response) => {
     try {
-        let user = req.user!
         let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
         if (!isAdmin) throw new Error("Unauthorized")
         await deleteUser(req.params.id)
@@ -38,7 +36,6 @@ let adminDeleteUser = async (req: Request, res: Response) => {
 let adminEditUser = async (req: Request, res: Response) => {
     try {
         let { newUsername, newPassword, newEmail, newRole  }: { newUsername: string, newPassword: string, newEmail: string, newRole: roles[] } = req.body
-        let user = req.user!
         let isAdmin = req.user?.roles.some(role => role.roleName == roles.ADMIN)
         if (!isAdmin) throw new Error("unauthorized")
         //edit

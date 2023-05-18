@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm"
 import Rest_Image from "./rest_image"
 import Rest_Review from "./rest_review"
 import DecimalTransformer from "../utilities/float._."

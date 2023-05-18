@@ -21,14 +21,6 @@ import carPostRoutes from './routes/carPostRoutes'
 import housePostRoutes from './routes/housePostRoutes'
 
 //test imports
-import Destination from "./entities/destination";
-import Dest_Image from "./entities/dest_image";
-import User_review from "./entities/user_review";
-import Restaurant from "./entities/restaurant";
-import Hotel from "./entities/hotel";
-import Comment from "./entities/comment";
-import RefreshToken from "./entities/refreshToken";
-import Like from "./entities/like"
 import User from "./entities/user";
 import Role from "./entities/role";
 import roles from "./constants/roles";
@@ -37,8 +29,7 @@ import Languages from "./constants/languages";
 import { generateHash } from "./utilities/hash";
 import { generateToken } from "./utilities/token";
 import Decimal from "decimal.js";
-import Special_User_Profile from "./entities/special_user_profile";
-import Car_Post from "./entities/car_post";
+
 
 declare global {
     namespace Express {
@@ -124,134 +115,6 @@ declare global {
         }
     })
 
-    app.get('/roles', async (req: Request, res: Response) => {
-        try {
-            let roles = await appDataSource.getRepository(Role).find()
-            res.json({ roles })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "failed" })
-        }
-    })
-
-    app.get('/allUsers', async (req: Request, res: Response) => {
-        try {
-            let userRepo = appDataSource.getRepository(User)
-            let users = await userRepo.find({ relations: {
-                roles: true,
-                tokens: true,
-                profile: true,
-                form: true
-            } })
-            res.json({users})
-        } catch (err) {
-            console.log(err);
-            res.json({ msg: "could not fetch users" })
-        }
-    })
-
-    app.get('/allTokens', async (req: Request, res: Response) => {
-        try {
-            let tokenRepo = appDataSource.getRepository(RefreshToken)
-            let tokens = await tokenRepo.find({ relations: { user: true } })
-            res.json({ tokens })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch tokens" })
-        }   
-    })
-
-    app.get('/allLikes', async (req: Request, res: Response) => {
-        try {
-            let likeRepo = appDataSource.getRepository(Like)
-            let likes = await likeRepo.find()
-            res.json({ likes })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch likes" })
-        }
-    })
-
-    app.get('/allComments', async (req: Request, res: Response) => {
-        try {
-           let commentRepo = appDataSource.getRepository(Comment)
-           let comments = await commentRepo.find()
-           res.json({ comments })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch comments" })
-        }
-    })
-
-    app.get('/allDest', async(req: Request, res: Response) => {
-        try {
-            let destRepo = appDataSource.getRepository(Destination)
-            let destinations = await destRepo.find({ relations: { images: true, reviews: true } })
-            res.json({ destinations })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch destination" })
-        }
-    })
-
-    app.get('/allDestImages', async(req: Request, res: Response) => {
-        try {
-            let destImageRepo = appDataSource.getRepository(Dest_Image)
-            let destImages = await destImageRepo.find()
-            res.json({ destImages })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch destinations' images" })
-        }
-    })
-
-    app.get('/allReviews', async (req: Request, res: Response) => {
-        let userReviewRepo = appDataSource.getRepository(User_review)
-        let reviews = await userReviewRepo.find({ relations: {user: true, ratedUser: true} })
-        res.json({ reviews })
-    })
-
-    app.get('/allRestaurants', async (req: Request, res: Response) => {
-        try {
-            let restRepo = appDataSource.getRepository(Restaurant)
-            let restaurants = await restRepo.find({relations: { images: true, reviews: true }});
-            res.json({restaurants})
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch restaurants" })
-        }
-    })
-
-    app.get('/allHotels', async (req: Request, res: Response) => {
-        try {
-            let hotelRepo = appDataSource.getRepository(Hotel)
-            let hotels = await hotelRepo.find({ relations: { images: true, reviews: true } })
-            res.json({ hotels })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch hotels" })
-        }
-    })
-
-    app.get('/profiles', async (req: Request, res: Response) => {
-        try {
-            let profiles = await appDataSource.getRepository(Special_User_Profile).find({ relations: { user: true, car_posts: true } })
-            res.json({ profiles })
-        } catch (error) {
-            console.log(error)
-            res.json({ error })
-        }
-    })
-
-    app.get('/allCarPosts', async (req: Request, res: Response) => {
-        try {
-            let car_posts = await appDataSource.getRepository(Car_Post).find({ relations: { profile: true } })
-            res.json({ car_posts })
-        } catch (error) {
-            console.log(error)
-            res.json({ msg: "could not fetch" })
-        }
-    })
 
 
     //routes

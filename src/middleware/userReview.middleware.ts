@@ -1,7 +1,6 @@
 import User_review from "../entities/user_review"
 import User from "../entities/user"
 import appDataSource from '../ormconfig'
-import { fetchUser } from "./user.middleware"
 import { Decimal } from "decimal.js"
 
 

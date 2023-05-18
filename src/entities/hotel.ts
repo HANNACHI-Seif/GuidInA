@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm"
 import Hotel_Image from "./hotel_image"
 import Hotel_Review from "./hotel_review"
 import DecimalTransformer from "../utilities/float._."

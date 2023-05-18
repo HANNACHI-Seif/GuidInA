@@ -1,5 +1,5 @@
 import { Length } from "class-validator";
-import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToOne, ManyToOne, OneToMany, JoinColumn } from "typeorm";
+import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToOne, OneToMany, JoinColumn } from "typeorm";
 import Language from "./language";
 import User from "./user";
 import House_Post from "./house_post";

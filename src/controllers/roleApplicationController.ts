@@ -5,7 +5,6 @@ import roles from "../constants/roles";
 import Languages from "../constants/languages";
 import errors from "../constants/errors";
 import appDataSource from "../ormconfig"
-import Role from "../entities/role";
 
 
 
