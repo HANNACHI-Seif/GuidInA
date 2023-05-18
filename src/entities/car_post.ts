@@ -33,7 +33,6 @@ export default class Car_Post {
 
     @BeforeRemove()
     removeImagesAndFiles() {
-        // Delete associated Post_Image entities and their files
         for (const image of this.images) {
           image.removeImage();
         }
