@@ -13,7 +13,8 @@ enum errors {
     UNAUTHORIZED = "Unauthorized, only admin can perform this action.",
     USER_NOT_FOUND ="User not found",
     RESOURCE_NOT_FOUND = "Resource not found",
-    UNAUTHORIZED_CAR_RENTERS_ONLY = "Unauthorized, only car renters can perform this action"
+    UNAUTHORIZED_CAR_RENTERS_ONLY = "Unauthorized, only car renters can perform this action",
+    UNAUTHORIZED_HOUSE_RENTERS_ONLY = "Unauthorized, only car renters can perform this action"
 }
 
 export default errors

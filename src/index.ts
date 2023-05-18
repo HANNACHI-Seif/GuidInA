@@ -18,6 +18,7 @@ import hotelReviewRoutes from './routes/hotelReviewRoutes'
 import restReviewRoutes from './routes/restReviewRoutes'
 import roleApplicationRoutes from './routes/roleApplicationRoutes'
 import carPostRoutes from './routes/carPostRoutes'
+import housePostRoutes from './routes/housePostRoutes'
 
 //test imports
 import Destination from "./entities/destination";
@@ -288,7 +289,11 @@ declare global {
     //special role application
     app.use('/special_role', roleApplicationRoutes)
 
+    //car renter posts
     app.use('/car_posts', carPostRoutes)
+
+    //house renter posts
+    app.use('/house_posts', housePostRoutes)
 
 
     //TODO: VALIDATION
