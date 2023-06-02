@@ -1,12 +1,12 @@
 import express from "express";
 import { authMiddleware } from "../utilities/token";
-import handleImageUpload from "../utilities/imageUploadHandler";
+import handleMultipleImageUpload from "../utilities/multipleImageUploadHandler";
 import { createHousePost, deleteHousePost, editHousePost } from "../controllers/housePostController";
 
 let router = express.Router()
 
 
-router.post('/add_house', authMiddleware, handleImageUpload, createHousePost)
+router.post('/add_house', authMiddleware, handleMultipleImageUpload, createHousePost)
 
 router.delete('/delete_house/:id', authMiddleware, deleteHousePost)
 

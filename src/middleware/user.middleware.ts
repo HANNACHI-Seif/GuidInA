@@ -7,6 +7,7 @@ import  roles  from "../constants/roles"
 import Decimal from "decimal.js"
 import Role from "../entities/role"
 import { validate } from "class-validator"
+import Special_User_Profile from "../entities/special_user_profile"
 
 interface errors_type {
     field: string,

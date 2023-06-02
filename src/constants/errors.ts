@@ -14,7 +14,9 @@ enum errors {
     USER_NOT_FOUND ="User not found",
     RESOURCE_NOT_FOUND = "Resource not found",
     UNAUTHORIZED_CAR_RENTERS_ONLY = "Unauthorized, only car renters can perform this action",
-    UNAUTHORIZED_HOUSE_RENTERS_ONLY = "Unauthorized, only car renters can perform this action"
+    UNAUTHORIZED_HOUSE_RENTERS_ONLY = "Unauthorized, only house renters can perform this action",
+    USERNAME_ALREADY_IN_USE = "Username is already in use. Please choose a different username.",
+    FORBIDDEN = "You are not authorized to perform this action. Please contact the administrator for assistance."
 }
 
 export default errors

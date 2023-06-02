@@ -11,8 +11,6 @@ router.post('/logout', authMiddleware, logoutUser)
 
 router.post('/refresh', refreshMiddleware, refreshAccessToken)
 
-router.patch('/password', authMiddleware, userEditPassword)
-
 router.get('/confirmation/:token', confirmEmailGet)
 
 router.post('/forgotPassword', forgotPassword)

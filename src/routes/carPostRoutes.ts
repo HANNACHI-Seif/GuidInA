@@ -1,12 +1,12 @@
 import express from 'express'
 import { changeCarState, createCarPost, deleteCarPost, editCarPost } from '../controllers/carPostController'
 import { authMiddleware } from '../utilities/token'
-import handleImageUpload from '../utilities/imageUploadHandler'
+import handleMultipleImageUpload from '../utilities/multipleImageUploadHandler'
 
 
 let router = express.Router()
 
-router.post('/add_car', authMiddleware, handleImageUpload, createCarPost)
+router.post('/add_car', authMiddleware, handleMultipleImageUpload, createCarPost)
 
 router.delete('/delete_car/:id', authMiddleware, deleteCarPost)
 

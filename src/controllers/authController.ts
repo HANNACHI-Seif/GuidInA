@@ -1,4 +1,4 @@
-import {  createUser, fetchUser, fetchUserByEmail, fetchUserByusrn } from "../middleware/user.middleware";
+import {  createUser, fetchUser, fetchUserByEmail, fetchUserByusrn, sanitizeUser } from "../middleware/user.middleware";
 import {  authToken, createToken, deleteToken, generateToken } from "../utilities/token";
 import { generateHash } from "../utilities/hash";
 import appDataSource from "../ormconfig"
@@ -15,6 +15,8 @@ let register_user = async (req: Request, res: Response) => {
     try {
         let { username, password, email }: { username: string, password: string, email: string } = req.body
         if (password.length < 6) throw new Error(errors.SHORT_PASSWORD)
+        let userByUsername = await fetchUserByusrn(username)
+        if (userByUsername) throw new Error(errors.USERNAME_ALREADY_IN_USE) 
         //creating new user
         let newUser = await createUser(username, password, email)
         if (!(newUser instanceof User)) {
@@ -30,8 +32,8 @@ let register_user = async (req: Request, res: Response) => {
             await createToken(refresh, (newUser as User))
             //sendConfirmationEmail(email, username, link)
             //response 
-            //res.json({ msg: "Please click on the link we have sent you via email to confirm your email><" })  
-            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })  
+            //res.json({ msg: "Please click on the link we have sent you via email to confirm your email" })  
+            res.cookie('jwt', refresh).json({ accessToken })  
         }
     } catch (error) {
         const str: string = error.message
@@ -39,8 +41,11 @@ let register_user = async (req: Request, res: Response) => {
             res.json({ errors: [{ field: "email", errors: [errors.EMAIL_ALREADY_REGISTERED] }] })
         } else if (str == errors.SHORT_PASSWORD) {
             res.json({ errors: [{ field: "password", errors: [errors.SHORT_PASSWORD] }] })
+        } else if (error.message == errors.USERNAME_ALREADY_IN_USE){
+            res.json({ errors: [ { field: "username", errors: [errors.USERNAME_ALREADY_IN_USE] } ] })
         } else {
-            res.json({ error: errors.INTERNAL_SERVER_ERROR })
+            //res.json({ error: errors.INTERNAL_SERVER_ERROR })
+            res.json({ errors: [ { field: "none", errors: [errors.INTERNAL_SERVER_ERROR] } ] })
         }
         
     }
@@ -112,20 +117,6 @@ let refreshAccessToken = async (req: Request, res: Response) => {
     }
 }
 
-let userEditPassword = async (req: Request, res: Response) => {
-    let { oldPassword, newPassword }: { oldPassword: string, newPassword: string } = req.body
-    let user = req.user!
-    try {
-        if (await bcrypt.compare(oldPassword, user.password)) {
-            //setting a new password
-            user.password = await generateHash(newPassword)
-            await appDataSource.manager.save(user)
-            res.json({ msg: "password updated successfuly" })
-        } else throw new Error(errors.WRONG_OLD_PASSEORD)
-    } catch (error) {
-        res.json({ error: error.message })
-    }
-}
 
 let forgotPassword = async (req: Request, res: Response) => {
     try {
@@ -178,7 +169,6 @@ export {
     logoutUser,
     refreshAccessToken,
     register_user,
-    userEditPassword,
     forgotPassword,
     resetPasswordPost,
     resetPasswordGet,
