@@ -32,6 +32,9 @@ export default class User {
     @IsNotEmpty({ message: "password is required"})
     password: string
 
+    @Column({ default: "" })
+    pfp_url: string
+
     @ManyToMany(() => Role)
     @JoinTable()
     roles: Role[]
