@@ -51,7 +51,7 @@ let fetchUser = (id: string, obj = {}) => {
 
 let fetchUserByusrn = (username: string) => {
     let userRepo = appDataSource.getRepository(User)
-    return userRepo.findOne({ where: { username: username }, relations: { tokens: true } })
+    return userRepo.findOne({ where: { username: username }, relations: { tokens: true, roles: true } })
 }
 
 let fetchUserByEmail = (email: string) => {
@@ -104,6 +104,26 @@ let AdminEditUser = async (userToEdit: User, newUsername: string, newPassword: s
     return appDataSource.manager.save(userToEdit)
 }
 
+let spUserEditProfileMiddleware = async (firstName: string, lastName: string, bio: string, profile: Special_User_Profile) => {
+    if ( firstName ) profile.firstName = firstName
+    if ( lastName ) profile.lastName = lastName
+    if ( bio ) profile.bio = bio
+    await appDataSource.manager.save(profile) 
+}
+
+let sanitizeUser = (user: User) => {
+    let roles: string[] = []
+    for (let role of user.roles) {
+        roles.push(role.roleName)
+    }
+    return {
+        username: user.username,
+        email: user.email,
+        id: user.id,
+        roles
+    }
+}
+
 export {
     createUser, 
     fetchUser,
@@ -111,5 +131,7 @@ export {
     fetchUserByEmail,
     deleteUser,
     AdminEditUser,
-    errors_type
+    errors_type,
+    spUserEditProfileMiddleware,
+    sanitizeUser
 }

@@ -74,7 +74,8 @@ let loginUser = async (req: Request, res: Response) => {
             let accessToken = await generateToken({ id: userByUsername!.id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
             await createToken(refresh, userByUsername!)
             //response
-            res.cookie('jwt', refresh, { httpOnly: true }).json({ accessToken })
+            let res_user = await sanitizeUser(userByUsername)
+            res.cookie('jwt', refresh).json({ accessToken, user: res_user })
         } else throw new Error(errors.WRONG_CREDENTIALS)
     } catch (error) {
         res.json({ error: error.message })

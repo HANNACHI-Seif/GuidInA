@@ -1,5 +1,5 @@
 import express from 'express'
-import { confirmEmailGet, forgotPassword, loginUser, logoutUser, refreshAccessToken, register_user, resetPasswordGet, resetPasswordPost, userEditPassword } from '../controllers/authController'
+import { confirmEmailGet, forgotPassword, loginUser, logoutUser, refreshAccessToken, register_user, resetPasswordGet, resetPasswordPost } from '../controllers/authController'
 import { authMiddleware, refreshMiddleware } from '../utilities/token'
 let router = express.Router()
 

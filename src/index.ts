@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import appDataSource from "./ormconfig"
 import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
+import cors from 'cors'
 
 
 //routes imports
@@ -47,6 +48,9 @@ declare global {
     
     const app = express()
     config();
+    app.use(cors({origin: "http://localhost:3000", credentials: true}, ))
+
+
 
     //midddleware
     app.use(express.json())
@@ -95,6 +99,7 @@ declare global {
             dummy.roles = [(await appDataSource.getRepository(Role).findOne({ where: { roleName: roles.TOURIST } }))!]
             dummy.username = "dummy"
             dummy.rating = new Decimal(0)
+            dummy.email_confirmed = true
             //preparing response
             let admin_result = await appDataSource.manager.save(admin_user)
             let dummy_result = await appDataSource.manager.save(dummy)
