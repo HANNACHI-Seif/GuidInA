@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { addRestaurantImageMiddleware, addRestaurantMiddleware, deleteRestaurantImageMiddleware, editRestaurantmiddleware, fetchRestaurant, fetchRestaurantImage } from "../middleware/restaurant.middleware";
 import appDataSource from '../ormconfig'
+import Restaurant from "../entities/restaurant";
+import errors from "../constants/errors";
 
 
 let addRestaurant = async (req: Request, res: Response) => {
@@ -66,10 +68,21 @@ let editRestaurant = async (req: Request, res: Response) => {
     }
 }
 
+let fetchRestaurantController = async (req: Request, res: Response) => {
+    try {
+        let restaurants = await appDataSource.getRepository(Restaurant).find({ take: 6, order: { rating: "DESC" } })
+        res.json({ restaurants })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 export {
     addRestaurant,
     addRestaurantImage,
     deleteRestaurantImage,
     deleteRestaurant,
-    editRestaurant
+    editRestaurant,
+    fetchRestaurantController
 }

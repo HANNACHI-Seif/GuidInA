@@ -1,7 +1,7 @@
 import express from 'express'
 import { authMiddleware } from '../utilities/token'
 import { adminCheck } from '../middleware/admin.middleware'
-import { addHotel, addHotelImage, deleteHotel, deleteHotelImage, editHotel } from '../controllers/hotelController'
+import { addHotel, addHotelImage, deleteHotel, deleteHotelImage, editHotel, fetchHotelController } from '../controllers/hotelController'
 import handleMultipleImageUpload from '../utilities/multipleImageUploadHandler'
 
 
@@ -18,6 +18,8 @@ router.delete('/:hotelId/image/:imageId', authMiddleware, adminCheck, deleteHote
 router.delete('/:id', authMiddleware, adminCheck, deleteHotel)
 
 router.patch('/:id/edit', authMiddleware, adminCheck, editHotel)
+
+router.get('/fetch', authMiddleware, fetchHotelController)
 
 
 

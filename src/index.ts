@@ -56,7 +56,7 @@ declare global {
     app.use(express.json())
     app.use(cookieParser())
 
-    app.listen(process.env.PORT, () => console.log("listening..."))
+    app.listen(process.env.PORT, () => console.log(`listening in port ${process.env.PORT}`))
 
     //testing routes:
     app.post('/TEST',async (req:Request, res: Response) => {

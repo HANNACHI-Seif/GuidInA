@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { addDestImageMiddleware, addDestMiddleware, deleteDestImageMiddleware, editDestmiddleware, fetchDest, fetchDestImage } from "../middleware/dest.middleware";
 import appDataSource from '../ormconfig'
+import Destination from "../entities/destination";
+import errors from "../constants/errors";
 
 
 let addDestination = async (req: Request, res: Response) => {
@@ -66,10 +68,21 @@ let editDest = async (req: Request, res: Response) => {
     }
 }
 
+let fetchDestController = async (req: Request, res: Response) => {
+    try {
+        let dests = await appDataSource.getRepository(Destination).find({ take: 6, order: { rating: "DESC" } })
+        res.json({ destinations: dests })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 export {
     addDestination,
     addDestImage,
     deleteDestImage,
     deleteDest,
-    editDest
+    editDest,
+    fetchDestController
 }

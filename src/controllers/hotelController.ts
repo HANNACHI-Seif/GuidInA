@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { addHotelMiddleware, fetchHotel, addHotelImageMiddleware, fetchHotelImage, deleteHotelImageMiddleware, editHotelmiddleware } from "../middleware/hotel.middleware";
 import appDataSource from '../ormconfig'
+import Hotel from "../entities/hotel";
+import errors from "../constants/errors";
 
 
 let addHotel = async (req: Request, res: Response) => {
@@ -66,10 +68,21 @@ let editHotel = async (req: Request, res: Response) => {
     }
 }
 
+let fetchHotelController = async (req: Request, res: Response) => {
+    try {
+        let hotels = await appDataSource.getRepository(Hotel).find({ take: 6, order: { rating: "DESC" } })
+        res.json({ hotels })
+    } catch (error) {
+        console.log(error)
+        res.json({ msg: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 export {
     addHotel,
     addHotelImage,
     deleteHotelImage,
     deleteHotel,
-    editHotel
+    editHotel,
+    fetchHotelController
 }
