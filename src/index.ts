@@ -30,6 +30,9 @@ import Languages from "./constants/languages";
 import { generateHash } from "./utilities/hash";
 import { generateToken } from "./utilities/token";
 import Decimal from "decimal.js";
+import Destination from "./entities/destination";
+import Restaurant from "./entities/restaurant";
+import Hotel from "./entities/hotel";
 
 
 declare global {
@@ -107,6 +110,30 @@ declare global {
             let dummy_access_token = await generateToken({ id: dummy_result.id }, process.env.ACCESS_TOKEN_SECRET!, "30d")
             let res_roles = await appDataSource.getRepository(Role).find()
             let res_languages = await appDataSource.getRepository(Language).find()
+            //creating a destination, hotel, restaurant
+            let dest = new Destination()
+            dest.city = "oran"
+            dest.description = "some destination description"
+            dest.maps_link = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1619.9731217502276!2d-0.6512254593335894!3d35.70294044521683!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd7e88e4d71ec7ef%3A0x93db231abcfcedd4!2sPlace%20Premier%20November%201954%2C%20Oran!5e0!3m2!1sfr!2sdz!4v1685749685157!5m2!1sfr!2sdz"
+            dest.name = "Place D'arm"
+            dest.rating = new Decimal(0)
+            await appDataSource.manager.save(dest)
+            let rest = new Restaurant()
+            rest.city = "oran"
+            rest.description = "some restaurant description"
+            rest.type = "traditional"
+            rest.maps_link = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5330.440721380961!2d-0.6353155359937026!3d35.6994119572659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd7e8852ea57cc01%3A0x71c58268e0aa0a17!2sEL%20BEY%20RESTAURANT!5e0!3m2!1sfr!2sdz!4v1685751643568!5m2!1sfr!2sdz"
+            rest.name = "El Bey Restaurant"
+            rest.rating = new Decimal(0)
+            await appDataSource.manager.save(rest)
+            let hotel = new Hotel()
+            hotel.city = "oran"
+            hotel.description = "some hotel description"
+            hotel.maps_link = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1100.295926039141!2d-0.6389736618925026!3d35.67057488696411!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd7e893793d1b31d%3A0xbbe2c3ad8339963e!2sRODINA%20H%C3%B4tel%2C%20SPA!5e0!3m2!1sfr!2sdz!4v1685751893296!5m2!1sfr!2sdz"
+            hotel.stars = 4
+            hotel.name = "Rodina"
+            hotel.rating = new Decimal(0)
+            await appDataSource.manager.save(hotel)
             //response
             res.json({
                 admin_access_token,

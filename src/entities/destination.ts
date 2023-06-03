@@ -19,7 +19,7 @@ export default class Destination {
     @Column()
     description: string
 
-    @Column()
+    @Column({ type: "text" })
     maps_link: string
 
     @Column( "decimal", { default: 0.0, precision: 6, scale: 1, transformer: new DecimalTransformer()})

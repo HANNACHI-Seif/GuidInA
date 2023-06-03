@@ -18,7 +18,7 @@ export default class Hotel {
     @Column()
     description: string
 
-    @Column()
+    @Column({ type: "text" })
     maps_link: string
 
     @Column()
