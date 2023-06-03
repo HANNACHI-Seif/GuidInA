@@ -20,6 +20,7 @@ import restReviewRoutes from './routes/restReviewRoutes'
 import roleApplicationRoutes from './routes/roleApplicationRoutes'
 import carPostRoutes from './routes/carPostRoutes'
 import housePostRoutes from './routes/housePostRoutes'
+import searchRoutes from './routes/searchRoutes'
 
 //test imports
 import User from "./entities/user";
@@ -189,6 +190,9 @@ declare global {
 
     //house renter posts
     app.use('/house_posts', housePostRoutes)
+
+    //search
+    app.use('/search', searchRoutes)
 
 
     //TODO: VALIDATION
