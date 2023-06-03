@@ -2,6 +2,8 @@ import appDataSource from "../ormconfig"
 import { AdminEditUser, createUser, deleteUser, fetchUser } from "../middleware/user.middleware";
 import { Request, Response } from "express";
 import roles from "../constants/roles";
+import User from "../entities/user";
+import errors from "src/constants/errors";
 
 
 
@@ -49,8 +51,20 @@ let adminEditUser = async (req: Request, res: Response) => {
     }
 }
 
+let adminFetchAllUsers = async (req: Request, res: Response) => {
+    try {
+        let users = await appDataSource.getRepository(User)
+            .find()
+        res.json({ users })
+    } catch (error) {
+        console.log(error)
+        res.json({ error: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 export {
     adminAddUser,
     adminDeleteUser,
-    adminEditUser
+    adminEditUser,
+    adminFetchAllUsers
 }
