@@ -82,9 +82,21 @@ let editCarPost = async (req: Request, res: Response) => {
     }
 }
 
+let fetchCarPosts = async (req: Request, res: Response) => {//this might need pagination
+    try {
+        let carPosts = await appDataSource.getRepository(Car_Post)
+            .find()
+        res.json({ posts: carPosts })
+    } catch (error) {
+        console.log(error)
+        res.json({ error: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 export {
     createCarPost,
     deleteCarPost,
     editCarPost,
-    changeCarState
+    changeCarState,
+    fetchCarPosts
 }

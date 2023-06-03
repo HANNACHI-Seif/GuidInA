@@ -5,6 +5,7 @@ import appDataSource from '../ormconfig'
 import errors from "../constants/errors"
 import { fetchUserByusrn, spUserEditProfileMiddleware } from "../middleware/user.middleware"
 import Special_User_Profile from "../entities/special_user_profile"
+import { fetchProfile } from "../middleware/carPost.middleware"
 
 let touristEditUsername = async (req: Request, res: Response) => {
     try {
@@ -62,11 +63,22 @@ let userUploadpfp = async (req: Request, res: Response) => {
         res.json({ error: errors.INTERNAL_SERVER_ERROR })
     }
 }
+ 
+let fetchSPUSerProfile = async (req: Request, res: Response) => {
+    try {
+        let profile = await fetchProfile(req.params.id)
+        res.json({ profile })
+    } catch (error) {
+        console.log(error)
+        res.json({ error: errors.INTERNAL_SERVER_ERROR })
+    }
+}
 
 
 export {
     touristEditUsername,
     userEditPassword,
     spUserEditProfile,
-    userUploadpfp
+    userUploadpfp,
+    fetchSPUSerProfile
 }

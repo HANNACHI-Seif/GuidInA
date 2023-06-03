@@ -89,10 +89,21 @@ let editHousePost = async (req: Request, res: Response) => {
     }
 }
 
+let fetchHousePosts = async (req: Request, res: Response) => {
+    try {
+        let housePosts = await appDataSource.getRepository(House_Post)
+            .find()
+        res.json({ posts: housePosts })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 export {
     createHousePost,
     deleteHousePost,
     editHousePost,
-    changeHouseState
+    changeHouseState,
+    fetchHousePosts
 }
