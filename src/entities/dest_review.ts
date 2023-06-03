@@ -14,6 +14,9 @@ export default class Dest_Review {
     @Column()
     stars: number
 
+    @Column()
+    isPositive: boolean
+
     @ManyToOne(() => Destination, destinatiion => destinatiion.reviews, { onDelete: "CASCADE" })
     destination: Destination
 

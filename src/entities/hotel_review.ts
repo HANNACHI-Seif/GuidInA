@@ -14,6 +14,9 @@ export default class Hotel_Review {
     @Column()
     stars: number
 
+    @Column()
+    isPositive: boolean
+
     @ManyToOne(() => Hotel, hotel => hotel.reviews, { onDelete: "CASCADE" })
     hotel: Hotel
 

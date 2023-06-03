@@ -13,6 +13,9 @@ export default class User_review {
     @Column()
     stars: number
 
+    @Column()
+    isPositive: boolean
+
     @ManyToOne(() => User, user => user.myReviews)
     ratedUser: User
 

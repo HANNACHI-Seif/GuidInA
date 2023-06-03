@@ -15,6 +15,9 @@ export default class Rest_Review {
     @Column()
     stars: number
 
+    @Column()
+    isPositive: boolean
+
     @ManyToOne(() => Restaurant, restaurant => restaurant.reviews, { onDelete: "CASCADE" })
     restaurant: Restaurant
 
