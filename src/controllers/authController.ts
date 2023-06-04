@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken"
 import sendResetPasswordEmail from "../utilities/resetEmail";
 import User from "../entities/user";
 import errors from "../constants/errors";
+import sendConfirmationEmail from "../utilities/confirmation_email";
 
 
 
@@ -27,13 +28,13 @@ let register_user = async (req: Request, res: Response) => {
             let email_confirmation_token = await generateToken({ id: id }, process.env.EMAIL_TOKEN_SECRET!, '1h')
             const link = `${process.env.BASE_URL}/user/confirmation/${email_confirmation_token}`
             //tokens only for testing:
-            let refresh = await generateToken({ id: id }, process.env.REFRESH_TOKEN_SECRET!, '7d')
-            let accessToken = await generateToken({ id: id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
-            await createToken(refresh, (newUser as User))
-            //sendConfirmationEmail(email, username, link)
+            //let refresh = await generateToken({ id: id }, process.env.REFRESH_TOKEN_SECRET!, '7d')
+            //let accessToken = await generateToken({ id: id }, process.env.ACCESS_TOKEN_SECRET!, '1d')
+            //await createToken(refresh, (newUser as User))
+            sendConfirmationEmail(email, username, link)
             //response 
-            //res.json({ msg: "Please click on the link we have sent you via email to confirm your email" })  
-            res.cookie('jwt', refresh).json({ accessToken })  
+            res.json({ msg: "Please click on the link we have sent you via email to confirm your email" })  
+            //res.cookie('jwt', refresh).json({ accessToken })  
         }
     } catch (error) {
         const str: string = error.message
@@ -45,6 +46,7 @@ let register_user = async (req: Request, res: Response) => {
             res.json({ errors: [ { field: "username", errors: [errors.USERNAME_ALREADY_IN_USE] } ] })
         } else {
             //res.json({ error: errors.INTERNAL_SERVER_ERROR })
+            console.log(error)
             res.json({ errors: [ { field: "none", errors: [errors.INTERNAL_SERVER_ERROR] } ] })
         }
         

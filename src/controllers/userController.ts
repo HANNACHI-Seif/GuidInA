@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import { generateHash } from "../utilities/hash"
 import appDataSource from '../ormconfig'
 import errors from "../constants/errors"
-import { fetchUserByusrn, spUserEditProfileMiddleware } from "../middleware/user.middleware"
+import { fetchUserByusrn, fetchUserRolesMiddleware, spUserEditProfileMiddleware } from "../middleware/user.middleware"
 import Special_User_Profile from "../entities/special_user_profile"
 import { fetchProfile } from "../middleware/carPost.middleware"
 
@@ -74,11 +74,22 @@ let fetchSPUSerProfile = async (req: Request, res: Response) => {
     }
 }
 
+let fetchUserRoles = (req: Request, res: Response) => {
+    try {
+        let roles = fetchUserRolesMiddleware(req.params.id)
+        res.json({ roles })
+    } catch (error) {
+        console.log(error)
+        res.json({ error: errors.INTERNAL_SERVER_ERROR })
+    }
+}
+
 
 export {
     touristEditUsername,
     userEditPassword,
     spUserEditProfile,
     userUploadpfp,
-    fetchSPUSerProfile
+    fetchSPUSerProfile,
+    fetchUserRoles
 }

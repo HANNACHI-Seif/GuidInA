@@ -9,10 +9,8 @@ let sentiment_isPositive = (text: string) => {
             error
           }
         }
-      
         // Parse the output from the Python script
         const output = parseInt(stdout.trim());
-      
         if (output == 1) return { error: null, result: true }
         return { error: null, result: false }
     });

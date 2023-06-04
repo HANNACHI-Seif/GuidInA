@@ -3,7 +3,7 @@ import { AdminEditUser, createUser, deleteUser, fetchUser } from "../middleware/
 import { Request, Response } from "express";
 import roles from "../constants/roles";
 import User from "../entities/user";
-import errors from "src/constants/errors";
+import errors from "../constants/errors";
 
 
 

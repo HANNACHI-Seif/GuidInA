@@ -125,6 +125,16 @@ let sanitizeUser = (user: User) => {
     }
 }
 
+let fetchUserRolesMiddleware = async (userId: string) => {
+    let roles:string[] = []
+    let user = await appDataSource.getRepository(User)
+        .findOne({ where: { id: userId }, relations: { roles: true } })
+    for (let role of user?.roles!) {
+        roles.push(role.roleName)
+    }
+    return roles
+}
+
 export {
     createUser, 
     fetchUser,
@@ -134,5 +144,6 @@ export {
     AdminEditUser,
     errors_type,
     spUserEditProfileMiddleware,
-    sanitizeUser
+    sanitizeUser,
+    fetchUserRolesMiddleware
 }

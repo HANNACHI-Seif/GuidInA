@@ -21,6 +21,7 @@ import roleApplicationRoutes from './routes/roleApplicationRoutes'
 import carPostRoutes from './routes/carPostRoutes'
 import housePostRoutes from './routes/housePostRoutes'
 import searchRoutes from './routes/searchRoutes'
+import userRoutes from './routes/userRoutes'
 
 //test imports
 import User from "./entities/user";
@@ -193,6 +194,9 @@ declare global {
 
     //search
     app.use('/search', searchRoutes)
+
+    //user utils routes
+    app.use('/user_utils', userRoutes)
 
 
     //TODO: VALIDATION
