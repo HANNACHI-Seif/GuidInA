@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
       user: "your email here",
-      pass: "your password here",
+      pass: "your email app password here",
     },
   });
 
@@ -25,9 +25,9 @@ const transporter = nodemailer.createTransport({
     });
   
     const mailOptions = {
-      from: "your email here",
+      from: "enterprise email here",
       to: email,
-      subject: "Reset Your Password",
+      subject: "Reset password",
       html,
     };
   

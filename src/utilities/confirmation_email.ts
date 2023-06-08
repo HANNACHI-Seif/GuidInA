@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
 service: "gmail",
 auth: {
     user: "your email here",
-    pass: "your password here",
+    pass: "your email app password here",
 },
 });
 
@@ -24,9 +24,9 @@ const html = compiledTemplate({
 });
 
 const mailOptions = {
-    from: "your email here",
+    from: "enterprise email here",
     to: email,
-    subject: "your password here",
+    subject: "email confirmation",
     html,
 };
 
